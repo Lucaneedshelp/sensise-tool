@@ -14,9 +14,8 @@ body {
   margin-bottom: 26px;
 }
 
-.topbar-label {
-  color: var(--color-text-muted);
-  font-weight: 700;
+.brand-name--small {
+  font-size: clamp(24px, 3vw, 32px);
 }
 
 .hero {
@@ -185,16 +184,6 @@ body {
   line-height: 1.65;
 }
 
-@media (max-width: 860px) {
-  .drop-panel,
-  .preview-head,
-  .app-topbar {
-    flex-direction: column;
-    align-items: start;
-  }
-}
-
-
 .filename-row {
   min-width: 220px;
   display: flex;
@@ -219,4 +208,13 @@ body {
 
 .filename-row input::placeholder {
   color: var(--color-text-muted);
+}
+
+@media (max-width: 860px) {
+  .drop-panel,
+  .preview-head,
+  .app-topbar {
+    flex-direction: column;
+    align-items: start;
+  }
 }

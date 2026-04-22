@@ -38,6 +38,11 @@ textarea {
   font: inherit;
 }
 
+img {
+  display: block;
+  max-width: 100%;
+}
+
 .container {
   width: min(calc(100% - 32px), var(--container));
   margin: 0 auto;
@@ -105,4 +110,45 @@ h1, h2, h3, p {
   border-radius: var(--radius-lg);
   box-shadow: var(--shadow-soft);
   backdrop-filter: blur(8px);
+}
+
+.brand-lockup {
+  display: inline-flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.brand-lockup--large {
+  gap: 18px;
+}
+
+.brand-logo {
+  width: 74px;
+  height: auto;
+  flex: 0 0 auto;
+}
+
+.brand-lockup--large .brand-logo {
+  width: 112px;
+}
+
+.brand-copy {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.brand-name {
+  font-size: clamp(28px, 4vw, 42px);
+  line-height: 0.95;
+  font-weight: 800;
+  letter-spacing: -0.04em;
+}
+
+.brand-subline {
+  color: var(--color-text-muted);
+  font-size: 14px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
 }
