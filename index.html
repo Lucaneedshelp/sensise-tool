@@ -8,53 +8,10 @@
   <link rel="stylesheet" href="assets/css/portal.css">
 </head>
 <body>
-  <header class="site-header">
-    <div class="container header-inner">
-      <div class="header-copy">
-        <div class="brand-lockup brand-lockup--large">
-          <img class="brand-logo" src="assets/img/sensise-logo-neg.png" alt="Sensise Logo">
-          <div class="brand-copy">
-            <span class="brand-name">sensise</span>
-            <span class="brand-subline">Tool Hub</span>
-          </div>
-        </div>
-        <div class="eyebrow">Sensise Tool Hub</div>
-        <h1>Interne Apps und Helfer</h1>
-        <p class="lead">Zentrale Startseite für HTML-Tools, Konfiguratoren und Generatoren.</p>
-      </div>
-      <a class="btn btn-primary" href="apps/json-generator/">JSON Generator öffnen</a>
-    </div>
-  </header>
-
-  <main class="container main-content">
-    <section class="intro-card">
-      <div>
-        <h2>Saubere Struktur statt Einzellösungen</h2>
-        <p>
-          Jede App läuft in einem eigenen Ordner und nutzt den gemeinsamen Sensise-Style.
-          So bleibt das Portal übersichtlich und neue Apps lassen sich einfach ergänzen.
-        </p>
-      </div>
-    </section>
-
-    <section>
-      <div class="section-head">
-        <h2>Apps</h2>
-        <p>Startpunkt für bestehende und kommende Tools</p>
-      </div>
-      <div id="app-grid" class="app-grid"></div>
-    </section>
+  <main class="portal-minimal container">
+    <img class="portal-logo" src="assets/img/sensise-logo-neg.png" alt="Sensise Logo">
+    <div id="app-grid" class="app-grid"></div>
   </main>
-
-  <footer class="site-footer">
-    <div class="container footer-inner">
-      <div class="footer-brand">
-        <img class="footer-brand__logo" src="assets/img/sensise-logo-neg.png" alt="Sensise Logo">
-        <span>Sensise Tool Hub</span>
-      </div>
-      <span>HTML · CSS · JavaScript</span>
-    </div>
-  </footer>
 
   <script src="assets/js/app-registry.js"></script>
   <script src="assets/js/portal.js"></script>
