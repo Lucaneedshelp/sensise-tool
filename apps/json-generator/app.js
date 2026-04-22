@@ -22,12 +22,15 @@ const errorBox = document.getElementById('error-box');
 const buildBtn = document.getElementById('build-btn');
 const copyBtn = document.getElementById('copy-btn');
 const downloadBtn = document.getElementById('download-btn');
+const fileNameInput = document.getElementById('file-name-input');
 
 fileTrigger.addEventListener('click', () => fileInput.click());
+
 fileInput.addEventListener('change', event => {
   const file = event.target.files[0];
   if (file) processFile(file);
 });
+
 buildBtn.addEventListener('click', buildJSON);
 copyBtn.addEventListener('click', copyJSON);
 downloadBtn.addEventListener('click', downloadJSON);
@@ -38,7 +41,12 @@ function setStatus(message) {
 
 function guessColumn(headers, hints) {
   for (const hint of hints) {
-    const found = headers.find(header => header && header.toString().toLowerCase().replace(/[\s_\-]/g, '').includes(hint.toLowerCase().replace(/[\s_\-]/g, '')));
+    const normalizedHint = hint.toLowerCase().replace(/[\s_\-]/g, '');
+    const found = headers.find(header => {
+      if (!header) return false;
+      const normalizedHeader = header.toString().toLowerCase().replace(/[\s_\-]/g, '');
+      return normalizedHeader.includes(normalizedHint);
+    });
     if (found) return found;
   }
   return '';
@@ -49,29 +57,89 @@ function normalizeHex(value) {
   return value.toString().replace(/[^a-fA-F0-9]/g, '').toUpperCase();
 }
 
-function processFile(file) {
-  const reader = new FileReader();
-  reader.onload = event => {
-    try {
-      const workbook = XLSX.read(new Uint8Array(event.target.result), { type: 'array' });
-      const worksheet = workbook.Sheets[workbook.SheetNames[0]];
-      const data = XLSX.utils.sheet_to_json(worksheet, { defval: '' });
 
-      if (!data.length) {
-        setStatus('Die Datei ist leer.');
-        return;
+function sanitizeFilename(value) {
+  const cleaned = (value || '')
+    .toString()
+    .trim()
+    .replace(/\.json$/i, '')
+    .replace(/[\/:*?"<>|]+/g, '-')
+    .replace(/\s+/g, '_')
+    .replace(/_+/g, '_')
+    .replace(/^[_\-.]+|[_\-.]+$/g, '');
+
+  return cleaned || 'sensise_devices';
+}
+
+function setSuggestedFilename(fileName) {
+  const baseName = (fileName || 'sensise_devices').replace(/\.[^.]+$/, '');
+  fileNameInput.value = sanitizeFilename(baseName);
+}
+
+function detectCsvSeparator(text) {
+  const firstNonEmptyLine = text
+    .split(/\r?\n/)
+    .find(line => line.trim().length > 0) || '';
+
+  const semicolons = (firstNonEmptyLine.match(/;/g) || []).length;
+  const commas = (firstNonEmptyLine.match(/,/g) || []).length;
+  const tabs = (firstNonEmptyLine.match(/\t/g) || []).length;
+
+  if (semicolons >= commas && semicolons >= tabs) return ';';
+  if (tabs >= commas && tabs >= semicolons) return '\t';
+  return ',';
+}
+
+async function processFile(file) {
+  try {
+    const lowerName = file.name.toLowerCase();
+    const isCSV = lowerName.endsWith('.csv');
+
+    let workbook;
+
+    if (isCSV) {
+      let text = await file.text();
+
+      if (text.charCodeAt(0) === 0xFEFF) {
+        text = text.slice(1);
       }
 
-      excelHeaders = Object.keys(data[0]);
-      excelRows = data;
-      setStatus(`${data.length} Zeilen aus "${file.name}" eingelesen`);
-      renderMapping();
-    } catch (error) {
-      setStatus(`Fehler beim Lesen: ${error.message}`);
-    }
-  };
+      const separator = detectCsvSeparator(text);
 
-  reader.readAsArrayBuffer(file);
+      workbook = XLSX.read(text, {
+        type: 'string',
+        raw: true,
+        FS: separator
+      });
+    } else {
+      const data = await file.arrayBuffer();
+      workbook = XLSX.read(data, { type: 'array' });
+    }
+
+    const firstSheetName = workbook.SheetNames[0];
+    const worksheet = workbook.Sheets[firstSheetName];
+    const data = XLSX.utils.sheet_to_json(worksheet, { defval: '' });
+
+    if (!data.length) {
+      setStatus('Die Datei ist leer.');
+      mappingSection.hidden = true;
+      previewSection.hidden = true;
+      statsBar.hidden = true;
+      return;
+    }
+
+    excelHeaders = Object.keys(data[0]);
+    excelRows = data;
+
+    setStatus(`${data.length} Zeilen aus "${file.name}" eingelesen`);
+    setSuggestedFilename(file.name);
+    renderMapping();
+  } catch (error) {
+    setStatus(`Fehler beim Lesen: ${error.message}`);
+    mappingSection.hidden = true;
+    previewSection.hidden = true;
+    statsBar.hidden = true;
+  }
 }
 
 function renderMapping() {
@@ -85,7 +153,11 @@ function renderMapping() {
       <label for="map-${field.key}">${field.label}</label>
       <select id="map-${field.key}">
         <option value="">— nicht zugeordnet —</option>
-        ${excelHeaders.map(header => `<option value="${header}" ${header === guessed ? 'selected' : ''}>${header}</option>`).join('')}
+        ${excelHeaders.map(header => `
+          <option value="${header}" ${header === guessed ? 'selected' : ''}>
+            ${header}
+          </option>
+        `).join('')}
       </select>
     `;
     mappingGrid.appendChild(card);
@@ -94,15 +166,18 @@ function renderMapping() {
   mappingSection.hidden = false;
   previewSection.hidden = true;
   statsBar.hidden = true;
+  errorBox.hidden = true;
+  errorBox.innerHTML = '';
 }
 
 function buildJSON() {
   const mapping = {};
+
   FIELDS.forEach(field => {
     mapping[field.key] = document.getElementById(`map-${field.key}`)?.value || '';
   });
 
-  const onMapVal = document.getElementById('on-map-val').value;
+  const onMapVal = document.getElementById('on-map-val').value === 'true';
   const errors = [];
   let okCount = 0;
 
@@ -127,8 +202,10 @@ function buildJSON() {
     return {
       name,
       platform: 'LORAWAN',
-      serialNumber: `eui-${devEui}`,
-      properties: { onMap: onMapVal },
+      serialNumber: devEui ? `eui-${devEui}` : '',
+      properties: {
+        onMap: onMapVal
+      },
       details: {
         type: 'LORAWAN',
         joinEui,
@@ -147,7 +224,9 @@ function buildJSON() {
 
   if (errors.length) {
     errorBox.hidden = false;
-    errorBox.innerHTML = errors.slice(0, 8).join('<br>') + (errors.length > 8 ? `<br>… und ${errors.length - 8} weitere` : '');
+    errorBox.innerHTML =
+      errors.slice(0, 8).join('<br>') +
+      (errors.length > 8 ? `<br>… und ${errors.length - 8} weitere` : '');
   } else {
     errorBox.hidden = true;
     errorBox.innerHTML = '';
@@ -163,9 +242,12 @@ function copyJSON() {
   navigator.clipboard.writeText(jsonOutput).then(() => {
     const originalText = copyBtn.textContent;
     copyBtn.textContent = 'Kopiert';
+
     setTimeout(() => {
       copyBtn.textContent = originalText;
     }, 1800);
+  }).catch(error => {
+    setStatus(`Fehler beim Kopieren: ${error.message}`);
   });
 }
 
@@ -174,7 +256,14 @@ function downloadJSON() {
 
   const blob = new Blob([jsonOutput], { type: 'application/json' });
   const link = document.createElement('a');
-  link.href = URL.createObjectURL(blob);
-  link.download = 'sensise_devices.json';
+  const objectUrl = URL.createObjectURL(blob);
+  const fileName = `${sanitizeFilename(fileNameInput.value)}.json`;
+
+  link.href = objectUrl;
+  link.download = fileName;
+  document.body.appendChild(link);
   link.click();
+  document.body.removeChild(link);
+
+  URL.revokeObjectURL(objectUrl);
 }

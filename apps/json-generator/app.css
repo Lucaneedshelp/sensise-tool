@@ -72,6 +72,8 @@ body {
 .status-msg {
   color: var(--color-text-muted);
   font-size: 14px;
+  min-height: 20px;
+  word-break: break-word;
 }
 
 .mapping-grid {
@@ -190,4 +192,31 @@ body {
     flex-direction: column;
     align-items: start;
   }
+}
+
+
+.filename-row {
+  min-width: 220px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  font-weight: 700;
+}
+
+.filename-row span {
+  font-size: 13px;
+  color: var(--color-text-muted);
+}
+
+.filename-row input {
+  width: 100%;
+  padding: 12px 14px;
+  border-radius: 12px;
+  border: 1px solid var(--color-border);
+  background: rgba(255, 255, 255, 0.08);
+  color: var(--color-text);
+}
+
+.filename-row input::placeholder {
+  color: var(--color-text-muted);
 }

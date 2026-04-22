@@ -16,17 +16,17 @@
 
     <header class="hero">
       <div class="eyebrow">Daten & Import</div>
-      <h1>Dateien zu Sensise JSON</h1>
+      <h1>Excel oder CSV zu Sensise JSON</h1>
       <p>Die Datei wird lokal im Browser verarbeitet. Nichts wird hochgeladen.</p>
     </header>
 
     <section class="panel drop-panel">
       <div>
         <h2>Datei auswählen</h2>
-        <p>.xlsx, .xls oder .csv – erste Tabelle wird eingelesen</p>
+        <p>.xlsx, .xls oder .csv – die erste Tabelle oder CSV-Datei wird eingelesen</p>
       </div>
       <div class="drop-actions">
-        <input type="file" id="file-input" accept=".xlsx,.xls,.csv" hidden>
+        <input type="file" id="file-input" accept=".xlsx,.xls,.csv,text/csv" hidden>
         <button class="btn btn-primary" id="file-trigger">Datei auswählen</button>
         <span id="status-msg" class="status-msg">Noch keine Datei geladen</span>
       </div>
@@ -71,6 +71,10 @@
           <p id="preview-meta">Noch keine Ausgabe vorhanden</p>
         </div>
         <div class="preview-actions">
+          <label class="filename-row" for="file-name-input">
+            <span>Dateiname</span>
+            <input type="text" id="file-name-input" placeholder="sensise_devices">
+          </label>
           <button class="btn btn-secondary" id="copy-btn">Kopieren</button>
           <button class="btn btn-primary" id="download-btn">JSON herunterladen</button>
         </div>
