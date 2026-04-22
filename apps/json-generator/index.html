@@ -1,86 +1,18 @@
 <!DOCTYPE html>
 <html lang="de">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Sensise JSON Generator</title>
-  <link rel="stylesheet" href="../../assets/css/theme.css">
-  <link rel="stylesheet" href="app.css">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JSON Generator</title>
 </head>
 <body>
-  <div class="container app-shell">
-    <div class="app-topbar">
-      <a class="btn btn-secondary" href="../../index.html">← Zur Startseite</a>
-      <div class="topbar-label">Sensise JSON Generator</div>
-    </div>
-
-    <header class="hero">
-      <div class="eyebrow">Daten & Import</div>
-      <h1>Excel zu Sensise JSON</h1>
-      <p>Die Datei wird lokal im Browser verarbeitet. Nichts wird hochgeladen.</p>
-    </header>
-
-    <section class="panel drop-panel">
-      <div>
-        <h2>Datei auswählen</h2>
-        <p>.xlsx oder .xls – erste Tabelle wird eingelesen</p>
-      </div>
-      <div class="drop-actions">
-        <input type="file" id="file-input" accept=".xlsx,.xls" hidden>
-        <button class="btn btn-primary" id="file-trigger">Excel-Datei auswählen</button>
-        <span id="status-msg" class="status-msg">Noch keine Datei geladen</span>
-      </div>
-    </section>
-
-    <section class="panel" id="mapping-section" hidden>
-      <div class="section-head app-section-head">
-        <h2>Spalten zuordnen</h2>
-        <p>Die wichtigsten Felder für den JSON-Export</p>
-      </div>
-      <div class="mapping-grid" id="mapping-grid"></div>
-      <div class="mapping-actions">
-        <label class="toggle-row">onMap-Wert
-          <select id="on-map-val">
-            <option value="false">false</option>
-            <option value="true">true</option>
-          </select>
-        </label>
-        <button class="btn btn-primary" id="build-btn">JSON generieren</button>
-      </div>
-    </section>
-
-    <section class="stats-grid" id="stats-bar" hidden>
-      <article class="stat-card">
-        <span>Geräte gesamt</span>
-        <strong id="stat-total">0</strong>
-      </article>
-      <article class="stat-card">
-        <span>Vollständig</span>
-        <strong id="stat-ok">0</strong>
-      </article>
-      <article class="stat-card">
-        <span>Warnungen</span>
-        <strong id="stat-warn">0</strong>
-      </article>
-    </section>
-
-    <section class="panel" id="preview-section" hidden>
-      <div class="preview-head">
-        <div>
-          <h2>JSON Ausgabe</h2>
-          <p id="preview-meta">Noch keine Ausgabe vorhanden</p>
-        </div>
-        <div class="preview-actions">
-          <button class="btn btn-secondary" id="copy-btn">Kopieren</button>
-          <button class="btn btn-primary" id="download-btn">JSON herunterladen</button>
-        </div>
-      </div>
-      <div id="error-box" class="error-box" hidden></div>
-      <pre id="json-preview" class="json-preview"></pre>
-    </section>
-  </div>
-
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
-  <script src="app.js"></script>
+    <h1>Dateien zu Sensise JSON</h1>
+    <p>Stellen Sie sicher, dass Ihre Datei im .xlsx, .xls oder .csv Format vorliegt. Die erste Tabelle wird eingelesen.</p>
+    <input type="file" id="fileInput" accept=".xlsx,.xls,.csv">
+    <button id="uploadButton">Datei auswählen</button>
+    
+    <script>
+        // JavaScript to handle file upload and conversion
+    </script>
 </body>
 </html>
