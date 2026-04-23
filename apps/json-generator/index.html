@@ -12,10 +12,6 @@
     <div class="app-topbar">
       <div class="brand-lockup">
         <img class="brand-logo" src="../../assets/img/sensise-logo-neg.png" alt="Sensise Logo">
-        <div class="brand-copy">
-          <span class="brand-name brand-name--small">sensise</span>
-          <span class="brand-subline">JSON Generator</span>
-        </div>
       </div>
       <a class="btn btn-secondary" href="../../index.html">Zurueck zur Startseite</a>
     </div>
@@ -32,7 +28,11 @@
       <div class="drop-panel">
         <div class="drop-copy">
           <h2>Datei auswaehlen</h2>
-          <p>.xlsx, .xls oder .csv</p>
+          <div class="format-list" aria-label="Unterstuetzte Dateiformate">
+            <span class="format-pill">XLSX</span>
+            <span class="format-pill">XLS</span>
+            <span class="format-pill">CSV</span>
+          </div>
         </div>
         <div class="drop-actions">
           <input type="file" id="file-input" accept=".xlsx,.xls,.csv,text/csv" hidden>
