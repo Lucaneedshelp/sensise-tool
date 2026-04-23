@@ -1,0 +1,107 @@
+﻿<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Payload Decoder Builder</title>
+  <link rel="stylesheet" href="../../assets/css/theme.css">
+  <link rel="stylesheet" href="app.css">
+</head>
+<body>
+  <div class="container app-shell">
+    <div class="app-topbar">
+      <div class="brand-lockup">
+        <img class="brand-logo" src="../../assets/img/sensise-logo-neg.png" alt="Sensise Logo">
+      </div>
+      <a class="btn btn-secondary" href="../../index.html">Zurück zur Startseite</a>
+    </div>
+
+    <header class="hero panel">
+      <div class="eyebrow">Payload Decoder Builder</div>
+      <h1>Payload Decoder Builder</h1>
+      <p>JavaScript-Decoder prüfen, erkannte Ausgabefelder auf erlaubte Sensortypen mappen und einen fertigen Wrapper-Decoder für Sensise exportieren.</p>
+    </header>
+
+    <section class="composer-grid">
+      <article class="panel panel-strong">
+        <div class="section-head">
+          <h2>1. Decoder einfügen</h2>
+          <p>Unterstützt die gängigen Funktionen <code>decodeUplink</code>, <code>Decoder</code> und <code>decodePayload</code>.</p>
+        </div>
+        <textarea id="decoder-source" class="code-input" spellcheck="false" placeholder="function decodeUplink(input) {
+  return { data: {} };
+}"></textarea>
+      </article>
+
+      <aside class="panel control-panel">
+        <div class="section-head">
+          <h2>2. Beispiel-Payload testen</h2>
+          <p>Mit einem Beispielpayload erkennt die App, welche Felder dein Decoder wirklich zurückgibt.</p>
+        </div>
+
+        <label class="field-group" for="payload-hex">
+          <span>Payload (Hex)</span>
+          <input id="payload-hex" class="field-input" type="text" placeholder="00FA321E">
+        </label>
+
+        <label class="field-group field-group--compact" for="fport-input">
+          <span>fPort</span>
+          <input id="fport-input" class="field-input" type="number" min="1" step="1" value="1">
+        </label>
+
+        <div class="action-stack">
+          <button class="btn btn-secondary" id="demo-btn" type="button">Demo laden</button>
+          <button class="btn btn-primary" id="analyze-btn" type="button">Decoder analysieren</button>
+        </div>
+
+        <div id="analysis-status" class="inline-status">Noch kein Decoder analysiert</div>
+
+        <div class="sensor-note">
+          <span>Zugelassene Sensortypen</span>
+          <strong id="sensor-type-count">0</strong>
+        </div>
+      </aside>
+    </section>
+
+    <section class="result-grid" id="result-grid" hidden>
+      <article class="panel">
+        <div class="section-head">
+          <h2>3. Erkannte Felder zuordnen</h2>
+          <p id="field-summary">Noch keine Felder erkannt</p>
+        </div>
+
+        <div id="duplicate-warning" class="alert-box" hidden></div>
+        <div id="field-list" class="field-list"></div>
+
+        <div class="section-actions">
+          <button class="btn btn-primary" id="generate-btn" type="button">Wrapper-Decoder erstellen</button>
+        </div>
+      </article>
+
+      <article class="panel">
+        <div class="section-head">
+          <h2>Analysierte Ausgabe</h2>
+          <p id="mode-badge">Noch keine Analyse</p>
+        </div>
+        <pre id="decoded-preview" class="code-preview"></pre>
+      </article>
+    </section>
+
+    <section class="panel export-panel" id="export-panel" hidden>
+      <div class="section-head">
+        <h2>4. Fertigen Decoder kopieren</h2>
+        <p id="export-summary">Nach dem Mapping erzeugt die App einen Wrapper, der nur deine erlaubten Sensortypen ausgibt.</p>
+      </div>
+
+      <div class="section-actions section-actions--spread">
+        <button class="btn btn-secondary" id="copy-output-btn" type="button">Decoder kopieren</button>
+        <span id="copy-status" class="inline-status inline-status--compact">Noch nichts generiert</span>
+      </div>
+
+      <textarea id="generated-output" class="code-output" spellcheck="false" readonly></textarea>
+    </section>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
