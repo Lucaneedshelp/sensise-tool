@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="de">
 <head>
   <meta charset="UTF-8">
@@ -17,35 +17,39 @@
           <span class="brand-subline">JSON Generator</span>
         </div>
       </div>
-      <a class="btn btn-secondary" href="../../index.html">← Zur Startseite</a>
+      <a class="btn btn-secondary" href="../../index.html">Zurueck zur Startseite</a>
     </div>
 
-    <header class="hero">
-      <div class="eyebrow">Daten & Import</div>
-      <h1>Excel oder CSV zu Sensise JSON</h1>
-      <p>Die Datei wird lokal im Browser verarbeitet. Nichts wird hochgeladen.</p>
-    </header>
+    <header class="hero panel">
+      <div class="hero-head">
+        <div>
+          <div class="eyebrow">JSON Generator</div>
+          <h1>Excel oder CSV zu Sensise JSON</h1>
+        </div>
+        <span class="hero-note">Lokal im Browser</span>
+      </div>
 
-    <section class="panel drop-panel">
-      <div>
-        <h2>Datei auswählen</h2>
-        <p>.xlsx, .xls oder .csv – die erste Tabelle oder CSV-Datei wird eingelesen</p>
+      <div class="drop-panel">
+        <div class="drop-copy">
+          <h2>Datei auswaehlen</h2>
+          <p>.xlsx, .xls oder .csv</p>
+        </div>
+        <div class="drop-actions">
+          <input type="file" id="file-input" accept=".xlsx,.xls,.csv,text/csv" hidden>
+          <button class="btn btn-primary" id="file-trigger">Datei auswaehlen</button>
+          <span id="status-msg" class="status-msg">Noch keine Datei geladen</span>
+        </div>
       </div>
-      <div class="drop-actions">
-        <input type="file" id="file-input" accept=".xlsx,.xls,.csv,text/csv" hidden>
-        <button class="btn btn-primary" id="file-trigger">Datei auswählen</button>
-        <span id="status-msg" class="status-msg">Noch keine Datei geladen</span>
-      </div>
-    </section>
+    </header>
 
     <section class="panel" id="mapping-section" hidden>
       <div class="section-head app-section-head">
-        <h2>Spalten zuordnen</h2>
-        <p>Die wichtigsten Felder für den JSON-Export</p>
+        <h2>Felder zuordnen</h2>
       </div>
       <div class="mapping-grid" id="mapping-grid"></div>
       <div class="mapping-actions">
-        <label class="toggle-row">onMap-Wert
+        <label class="toggle-row">
+          <span>onMap</span>
           <select id="on-map-val">
             <option value="false">false</option>
             <option value="true">true</option>
@@ -57,11 +61,11 @@
 
     <section class="stats-grid" id="stats-bar" hidden>
       <article class="stat-card">
-        <span>Geräte gesamt</span>
+        <span>Geraete gesamt</span>
         <strong id="stat-total">0</strong>
       </article>
       <article class="stat-card">
-        <span>Vollständig</span>
+        <span>Vollstaendig</span>
         <strong id="stat-ok">0</strong>
       </article>
       <article class="stat-card">
@@ -73,8 +77,8 @@
     <section class="panel" id="preview-section" hidden>
       <div class="preview-head">
         <div>
-          <h2>JSON Ausgabe</h2>
-          <p id="preview-meta">Noch keine Ausgabe vorhanden</p>
+          <h2>JSON Vorschau</h2>
+          <p id="preview-meta">Noch keine Ausgabe</p>
         </div>
         <div class="preview-actions">
           <label class="filename-row" for="file-name-input">
