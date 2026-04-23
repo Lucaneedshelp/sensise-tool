@@ -9,21 +9,21 @@
     url: 'apps/json-generator/'
   },
   {
-    id: 'payload-decoder-builder',
-    title: 'Payload Decoder Builder',
-    description: 'Payload Decoder analysieren, erkannte Felder auf erlaubte Sensortypen mappen und fertige Wrapper exportieren.',
-    category: 'LoRaWAN',
-    badge: 'New',
-    icon: 'PD',
-    url: 'apps/payload-decoder-builder/'
-  },
-  {
     id: 'device-import',
     title: 'Device Import',
     description: 'Platzhalter für eine kommende App zum Geräteimport und zur Vorvalidierung.',
     category: 'Geräte',
     badge: 'Coming next',
     icon: 'DI',
+    url: '#'
+  },
+  {
+    id: 'alarm-config',
+    title: 'Alarm Config',
+    description: 'Platzhalter für Regel- und Alarmkonfigurationen in einer eigenen App.',
+    category: 'Alerting',
+    badge: 'Coming next',
+    icon: 'AL',
     url: '#'
   }
 ];
