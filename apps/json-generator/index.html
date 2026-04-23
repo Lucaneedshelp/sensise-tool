@@ -1,9 +1,9 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="de">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Sensise LoRaWAN Credentials</title>
+  <title>Sensise JSON Generator</title>
   <link rel="stylesheet" href="../../assets/css/theme.css">
   <link rel="stylesheet" href="app.css">
 </head>
@@ -17,44 +17,78 @@
     </div>
 
     <header class="hero panel">
-      <div class="hero-head">
-        <div>
-          <h1>LoRaWAN Credentials<br>zu JSON konvertieren</h1>
-        </div>
-      </div>
-
-      <div class="drop-panel">
-        <div class="drop-copy">
-          <h2>Credentials-Datei</h2>
-          <div class="format-list" aria-label="Unterstützte Dateiformate">
-            <span class="format-pill">XLSX</span>
-            <span class="format-pill">XLS</span>
-            <span class="format-pill">CSV</span>
-          </div>
-        </div>
-        <div class="drop-actions">
-          <input type="file" id="file-input" accept=".xlsx,.xls,.csv,text/csv" hidden>
-          <button class="btn btn-primary" id="file-trigger">Datei laden</button>
-          <span id="status-msg" class="status-msg">Noch keine Datei geladen</span>
-        </div>
-      </div>
+      <div class="eyebrow">JSON Generator</div>
+      <h1>LoRaWAN Credentials<br>zu JSON konvertieren</h1>
+      <p>Credential-Listen aus Excel oder CSV in Sensise-kompatibles JSON umwandeln, Felder prüfen und direkt exportieren.</p>
     </header>
 
-    <section class="panel" id="mapping-section" hidden>
-      <div class="section-head app-section-head">
-        <h2>Felder zuordnen</h2>
-      </div>
-      <div class="mapping-grid" id="mapping-grid"></div>
-      <div class="mapping-actions">
-        <label class="toggle-row">
+    <section class="composer-grid">
+      <article class="panel panel-strong">
+        <div class="section-head">
+          <h2>1. Credentials-Datei laden</h2>
+          <p>Unterstützt <code>XLSX</code>, <code>XLS</code> und <code>CSV</code>. Nach dem Einlesen setzt die App passende Spaltenvorschläge automatisch.</p>
+        </div>
+
+        <div class="drop-panel">
+          <div class="drop-copy">
+            <span class="detail-label">Unterstützte Formate</span>
+            <div class="format-list" aria-label="Unterstützte Dateiformate">
+              <span class="format-pill">XLSX</span>
+              <span class="format-pill">XLS</span>
+              <span class="format-pill">CSV</span>
+            </div>
+          </div>
+
+          <div class="drop-actions">
+            <input type="file" id="file-input" accept=".xlsx,.xls,.csv,text/csv" hidden>
+            <button class="btn btn-primary" id="file-trigger">Datei laden</button>
+          </div>
+        </div>
+      </article>
+
+      <aside class="panel control-panel">
+        <div class="section-head">
+          <h2>2. Status</h2>
+          <p>Die Datei bleibt lokal im Browser. Sobald Inhalte erkannt werden, kannst du die Felder direkt zuordnen.</p>
+        </div>
+
+        <div id="status-msg" class="inline-status">Noch keine Datei geladen</div>
+
+        <div class="sensor-note">
+          <span>Exportformat</span>
+          <strong>JSON</strong>
+        </div>
+      </aside>
+    </section>
+
+    <section class="composer-grid" id="mapping-section" hidden>
+      <article class="panel panel-strong">
+        <div class="section-head">
+          <h2>3. Felder zuordnen</h2>
+          <p>Prüfe die erkannten Spalten und passe sie bei Bedarf an, bevor das JSON erzeugt wird.</p>
+        </div>
+
+        <div class="mapping-grid" id="mapping-grid"></div>
+      </article>
+
+      <aside class="panel control-panel">
+        <div class="section-head">
+          <h2>4. Export vorbereiten</h2>
+          <p>Lege fest, ob alle Geräte direkt mit <code>onMap</code> ausgeliefert werden sollen.</p>
+        </div>
+
+        <label class="field-group" for="on-map-val">
           <span>onMap</span>
-          <select id="on-map-val">
+          <select id="on-map-val" class="field-input">
             <option value="false">false</option>
             <option value="true">true</option>
           </select>
         </label>
-        <button class="btn btn-primary" id="build-btn">JSON generieren</button>
-      </div>
+
+        <div class="section-actions">
+          <button class="btn btn-primary" id="build-btn">JSON generieren</button>
+        </div>
+      </aside>
     </section>
 
     <section class="stats-grid" id="stats-bar" hidden>
@@ -72,23 +106,25 @@
       </article>
     </section>
 
-    <section class="panel" id="preview-section" hidden>
+    <section class="panel export-panel" id="preview-section" hidden>
       <div class="preview-head">
-        <div>
-          <h2>JSON-Vorschau</h2>
+        <div class="section-head section-head--compact">
+          <h2>5. JSON-Vorschau</h2>
           <p id="preview-meta">Noch keine Ausgabe</p>
         </div>
+
         <div class="preview-actions">
-          <label class="filename-row" for="file-name-input">
+          <label class="field-group filename-row" for="file-name-input">
             <span>Dateiname</span>
-            <input type="text" id="file-name-input" placeholder="sensise_devices">
+            <input type="text" id="file-name-input" class="field-input" placeholder="sensise_devices">
           </label>
           <button class="btn btn-secondary" id="copy-btn">Kopieren</button>
           <button class="btn btn-primary" id="download-btn">JSON herunterladen</button>
         </div>
       </div>
-      <div id="error-box" class="error-box" hidden></div>
-      <pre id="json-preview" class="json-preview"></pre>
+
+      <div id="error-box" class="alert-box" hidden></div>
+      <pre id="json-preview" class="code-preview"></pre>
     </section>
   </div>
 
@@ -96,5 +132,3 @@
   <script src="app.js"></script>
 </body>
 </html>
-
-

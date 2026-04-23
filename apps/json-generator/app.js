@@ -39,8 +39,13 @@ buildBtn.addEventListener('click', buildJSON);
 copyBtn.addEventListener('click', copyJSON);
 downloadBtn.addEventListener('click', downloadJSON);
 
-function setStatus(message) {
+function setStatus(message, tone = '') {
   statusMsg.textContent = message;
+  statusMsg.className = 'inline-status';
+
+  if (tone) {
+    statusMsg.classList.add(`inline-status--${tone}`);
+  }
 }
 
 function guessColumn(headers, hints) {
@@ -124,7 +129,7 @@ async function processFile(file) {
     const data = XLSX.utils.sheet_to_json(worksheet, { defval: '' });
 
     if (!data.length) {
-      setStatus('Die Datei ist leer.');
+      setStatus('Die Datei ist leer.', 'warning');
       mappingSection.hidden = true;
       previewSection.hidden = true;
       statsBar.hidden = true;
@@ -134,11 +139,11 @@ async function processFile(file) {
     excelHeaders = Object.keys(data[0]);
     excelRows = data;
 
-    setStatus(`${data.length} Zeilen aus "${file.name}" eingelesen`);
+    setStatus(`${data.length} Zeilen aus "${file.name}" eingelesen`, 'success');
     setSuggestedFilename(file.name);
     renderMapping();
   } catch (error) {
-    setStatus(`Fehler beim Lesen: ${error.message}`);
+    setStatus(`Fehler beim Lesen: ${error.message}`, 'error');
     mappingSection.hidden = true;
     previewSection.hidden = true;
     statsBar.hidden = true;
@@ -230,11 +235,11 @@ function buildJSON() {
     errorBox.innerHTML =
       errors.slice(0, 8).join('<br>') +
       (errors.length > 8 ? `<br>… und ${errors.length - 8} weitere` : '');
-    setStatus(`JSON erstellt: ${errors.length} Warnungen gefunden.`);
+    setStatus(`JSON erstellt: ${errors.length} Warnungen gefunden.`, 'warning');
   } else {
     errorBox.hidden = true;
     errorBox.innerHTML = '';
-    setStatus('JSON erfolgreich erstellt.');
+    setStatus('JSON erfolgreich erstellt.', 'success');
   }
 
   previewSection.hidden = false;
@@ -247,13 +252,13 @@ function copyJSON() {
   navigator.clipboard.writeText(jsonOutput).then(() => {
     const originalText = copyBtn.textContent;
     copyBtn.textContent = 'Kopiert';
-    setStatus('JSON in die Zwischenablage kopiert.');
+    setStatus('JSON in die Zwischenablage kopiert.', 'success');
 
     setTimeout(() => {
       copyBtn.textContent = originalText;
     }, 1800);
   }).catch(error => {
-    setStatus(`Fehler beim Kopieren: ${error.message}`);
+    setStatus(`Fehler beim Kopieren: ${error.message}`, 'error');
   });
 }
 
@@ -272,5 +277,5 @@ function downloadJSON() {
   document.body.removeChild(link);
 
   URL.revokeObjectURL(objectUrl);
-  setStatus(`JSON „${fileName}“ wurde heruntergeladen.`);
+  setStatus(`JSON „${fileName}“ wurde heruntergeladen.`, 'success');
 }
