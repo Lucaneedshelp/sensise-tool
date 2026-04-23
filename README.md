@@ -1,4 +1,4 @@
-# Sensise Tools Starter
+﻿# Sensise Tools Starter
 
 Dieses Starterpaket enthält:
 
@@ -18,5 +18,5 @@ Dieses Starterpaket enthält:
 
 1. Repository anlegen
 2. Dateien hochladen
-3. Unter **Settings → Pages** als Source den Branch `main` und den Ordner `/ (root)` wählen
+3. Unter **Settings -> Pages** als Source den Branch `main` und den Ordner `/ (root)` wählen
 4. Nach dem Build die GitHub-Pages-URL aufrufen

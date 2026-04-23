@@ -1,4 +1,4 @@
-const APP_REGISTRY = [
+﻿const APP_REGISTRY = [
   {
     id: 'json-generator',
     title: 'JSON Generator',
@@ -11,7 +11,7 @@ const APP_REGISTRY = [
   {
     id: 'device-import',
     title: 'Device Import',
-    description: 'Platzhalter für kommende App zum Geräteimport und zur Vorvalidierung.',
+    description: 'Platzhalter für eine kommende App zum Geräteimport und zur Vorvalidierung.',
     category: 'Geräte',
     badge: 'Coming next',
     icon: 'DI',

@@ -3,6 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sensise JSON-Generator</title>
   <link rel="stylesheet" href="../../assets/css/theme.css">
   <link rel="stylesheet" href="app.css">
 </head>
@@ -18,8 +19,11 @@
     <header class="hero panel">
       <div class="hero-head">
         <div>
-          <h1>Excel oder CSV zu Sensise JSON</h1>
+          <h1>Excel oder CSV in Sensise JSON</h1>
         </div>
+        <span class="hero-note">Lokal im Browser</span>
+      </div>
+
       <div class="drop-panel">
         <div class="drop-copy">
           <h2>Datei auswählen</h2>
@@ -31,7 +35,7 @@
         </div>
         <div class="drop-actions">
           <input type="file" id="file-input" accept=".xlsx,.xls,.csv,text/csv" hidden>
-          <button class="btn btn-primary" id="file-trigger">Datei auswaehlen</button>
+          <button class="btn btn-primary" id="file-trigger">Datei auswählen</button>
           <span id="status-msg" class="status-msg">Noch keine Datei geladen</span>
         </div>
       </div>
@@ -56,11 +60,11 @@
 
     <section class="stats-grid" id="stats-bar" hidden>
       <article class="stat-card">
-        <span>Geraete gesamt</span>
+        <span>Geräte gesamt</span>
         <strong id="stat-total">0</strong>
       </article>
       <article class="stat-card">
-        <span>Vollstaendig</span>
+        <span>Vollständig</span>
         <strong id="stat-ok">0</strong>
       </article>
       <article class="stat-card">
@@ -72,7 +76,7 @@
     <section class="panel" id="preview-section" hidden>
       <div class="preview-head">
         <div>
-          <h2>JSON Vorschau</h2>
+          <h2>JSON-Vorschau</h2>
           <p id="preview-meta">Noch keine Ausgabe</p>
         </div>
         <div class="preview-actions">
@@ -93,4 +97,3 @@
   <script src="app.js"></script>
 </body>
 </html>
-

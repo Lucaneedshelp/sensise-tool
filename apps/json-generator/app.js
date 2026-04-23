@@ -1,12 +1,16 @@
-let excelHeaders = [];
+﻿let excelHeaders = [];
 let excelRows = [];
 let jsonOutput = null;
 
 const FIELDS = [
-  { key: 'name', label: 'Gerätename / Description', hints: ['name', 'bezeichnung', 'device', 'gerät', 'description', 'descr', 'label', 'titel'] },
+  {
+    key: 'name',
+    label: 'Gerätename / Beschreibung',
+    hints: ['name', 'bezeichnung', 'device', 'gerät', 'description', 'descr', 'label', 'titel']
+  },
   { key: 'dev_eui', label: 'DevEUI', hints: ['deveui', 'dev_eui', 'deviceeui', 'eui'] },
   { key: 'join_eui', label: 'AppEUI / JoinEUI', hints: ['joineui', 'join_eui', 'appeui', 'app_eui', 'applicationeui'] },
-  { key: 'app_key', label: 'AppKey', hints: ['appkey', 'app_key', 'applicationkey', 'nwkkey', 'key'] },
+  { key: 'app_key', label: 'AppKey', hints: ['appkey', 'app_key', 'applicationkey', 'nwkkey', 'key'] }
 ];
 
 const fileInput = document.getElementById('file-input');
@@ -57,7 +61,6 @@ function normalizeHex(value) {
   return value.toString().replace(/[^a-fA-F0-9]/g, '').toUpperCase();
 }
 
-
 function sanitizeFilename(value) {
   const cleaned = (value || '')
     .toString()
@@ -100,7 +103,7 @@ async function processFile(file) {
     if (isCSV) {
       let text = await file.text();
 
-      if (text.charCodeAt(0) === 0xFEFF) {
+      if (text.charCodeAt(0) === 0xfeff) {
         text = text.slice(1);
       }
 
@@ -227,9 +230,11 @@ function buildJSON() {
     errorBox.innerHTML =
       errors.slice(0, 8).join('<br>') +
       (errors.length > 8 ? `<br>… und ${errors.length - 8} weitere` : '');
+    setStatus(`JSON erstellt: ${errors.length} Warnungen gefunden.`);
   } else {
     errorBox.hidden = true;
     errorBox.innerHTML = '';
+    setStatus('JSON erfolgreich erstellt.');
   }
 
   previewSection.hidden = false;
@@ -242,6 +247,7 @@ function copyJSON() {
   navigator.clipboard.writeText(jsonOutput).then(() => {
     const originalText = copyBtn.textContent;
     copyBtn.textContent = 'Kopiert';
+    setStatus('JSON in die Zwischenablage kopiert.');
 
     setTimeout(() => {
       copyBtn.textContent = originalText;
@@ -266,4 +272,5 @@ function downloadJSON() {
   document.body.removeChild(link);
 
   URL.revokeObjectURL(objectUrl);
+  setStatus(`JSON „${fileName}“ wurde heruntergeladen.`);
 }
