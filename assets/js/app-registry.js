@@ -25,14 +25,5 @@
     badge: 'Coming next',
     icon: 'DI',
     url: '#'
-  },
-  {
-    id: 'alarm-config',
-    title: 'Alarm Config',
-    description: 'Platzhalter für Regel- und Alarmkonfigurationen in einer eigenen App.',
-    category: 'Alerting',
-    badge: 'Coming next',
-    icon: 'AL',
-    url: '#'
   }
 ];
