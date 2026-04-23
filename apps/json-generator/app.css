@@ -39,31 +39,16 @@
 }
 
 .hero-head {
-  display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  gap: 18px;
+  margin-bottom: 0;
 }
 
 .hero h1 {
   margin: 0;
-  max-width: 13ch;
-  font-size: clamp(36px, 5.2vw, 62px);
-  line-height: 0.96;
+  max-width: 20ch;
+  font-size: clamp(30px, 4vw, 46px);
+  line-height: 1;
+  text-wrap: balance;
   letter-spacing: -0.04em;
-}
-
-.hero-note {
-  display: inline-flex;
-  align-items: center;
-  min-height: 44px;
-  padding: 0 16px;
-  border-radius: 999px;
-  border: 1px solid rgba(243, 145, 0, 0.25);
-  background: rgba(243, 145, 0, 0.08);
-  color: var(--color-text-muted);
-  font-size: 14px;
-  font-weight: 700;
 }
 
 .panel {
@@ -77,8 +62,9 @@
 
 .drop-panel {
   display: grid;
-  grid-template-columns: minmax(0, 1.15fr) minmax(280px, 360px);
-  gap: 24px;
+  grid-template-columns: minmax(0, 1.15fr) minmax(280px, 340px);
+  align-items: center;
+  gap: 28px;
   margin-top: 26px;
   padding-top: 24px;
   border-top: 1px solid rgba(231, 233, 236, 0.12);
@@ -135,35 +121,34 @@
   flex-direction: column;
   align-items: stretch;
   justify-content: center;
-  gap: 12px;
-  padding: 18px;
-  border-radius: 18px;
-  background: rgba(0, 0, 0, 0.18);
-  border: 1px solid rgba(231, 233, 236, 0.14);
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04);
+  gap: 14px;
+  padding-left: 28px;
+  border-left: 1px solid rgba(231, 233, 236, 0.12);
 }
 
 .drop-actions .btn {
   width: 100%;
   min-width: 0;
-  min-height: 56px;
+  min-height: 58px;
   font-size: 16px;
+  box-shadow: 0 14px 32px rgba(0, 0, 0, 0.16);
 }
 
 .status-msg {
   display: flex;
   align-items: center;
+  justify-content: center;
   width: 100%;
-  min-height: 52px;
-  padding: 12px 14px;
-  border-radius: 14px;
-  background: rgba(255, 255, 255, 0.05);
-  border: 1px solid rgba(231, 233, 236, 0.12);
+  min-height: 22px;
   color: var(--color-text-muted);
-  font-size: 14px;
+  font-size: 13px;
   line-height: 1.45;
-  text-align: left;
+  text-align: center;
   word-break: break-word;
+}
+
+.status-msg::before {
+  content: none;
 }
 
 .mapping-grid {
@@ -307,7 +292,6 @@
 }
 
 @media (max-width: 860px) {
-  .hero-head,
   .preview-head,
   .app-topbar {
     flex-direction: column;
@@ -320,7 +304,7 @@
 
   .hero h1 {
     max-width: none;
-    font-size: clamp(34px, 10vw, 48px);
+    font-size: clamp(28px, 8vw, 40px);
   }
 
   .drop-panel {
@@ -336,7 +320,10 @@
 
   .drop-actions {
     width: 100%;
-    padding: 16px;
+    padding-left: 0;
+    padding-top: 18px;
+    border-left: none;
+    border-top: 1px solid rgba(231, 233, 236, 0.12);
   }
 
   .drop-actions .btn {
@@ -344,3 +331,4 @@
     min-width: 0;
   }
 }
+
