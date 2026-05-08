@@ -25,14 +25,5 @@
     badge: 'New',
     icon: '€',
     url: 'apps/project-calculator/'
-  },
-  {
-    id: 'device-import',
-    title: 'Device Import',
-    description: 'Platzhalter für eine kommende App zum Geräteimport und zur Vorvalidierung.',
-    category: 'Geräte',
-    badge: 'Coming next',
-    icon: 'DI',
-    url: '#'
   }
 ];
