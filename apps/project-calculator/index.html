@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sensise Projektkalkulator</title>
+  <link rel="stylesheet" href="../../assets/css/theme.css">
+  <link rel="stylesheet" href="app.css">
+</head>
+<body>
+  <div class="container app-shell">
+    <div class="app-topbar">
+      <a class="btn btn-secondary" href="../../index.html">Zurück zur Startseite</a>
+      <div class="brand-lockup">
+        <img class="brand-logo" src="../../assets/img/sensise-logo-neg.png" alt="Sensise Logo">
+      </div>
+    </div>
+
+    <header class="hero panel">
+      <div>
+        <span class="eyebrow">Kalkulation</span>
+        <h1>Projektkosten schnell berechnen</h1>
+      </div>
+      <div class="hero-metrics">
+        <article>
+          <span>Katalog</span>
+          <strong id="catalog-count">0</strong>
+        </article>
+        <article>
+          <span>Positionen</span>
+          <strong id="line-count">0</strong>
+        </article>
+        <article>
+          <span>Gesamt</span>
+          <strong id="grand-total">0,00 €</strong>
+        </article>
+      </div>
+    </header>
+
+    <section class="panel project-panel">
+      <input id="project-name" type="text" placeholder="Projektname">
+      <input id="customer-name" type="text" placeholder="Kunde">
+      <select id="vat-mode">
+        <option value="net">Netto anzeigen</option>
+        <option value="gross">Brutto inkl. 19%</option>
+      </select>
+    </section>
+
+    <main class="workspace">
+      <section class="panel catalog-panel">
+        <div class="section-head">
+          <div>
+            <h2>Produktkatalog</h2>
+            <p id="result-count">0 Treffer</p>
+          </div>
+        </div>
+        <div class="catalog-tools">
+          <input id="search" type="search" placeholder="Suchen nach Produkt, Kurzbezeichnung, Hersteller...">
+          <select id="category-filter"></select>
+        </div>
+        <div class="table-wrap catalog-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Artikel</th>
+                <th>Gruppe</th>
+                <th class="num">Preis</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody id="catalog-body"></tbody>
+          </table>
+        </div>
+      </section>
+
+      <section class="panel calc-panel">
+        <div class="section-head">
+          <div>
+            <h2>Kalkulation</h2>
+            <p>BLP Sensise als Preisbasis</p>
+          </div>
+          <div class="action-row">
+            <button class="btn btn-secondary" id="starter-btn">Starterpaket</button>
+            <button class="btn btn-secondary" id="clear-btn">Leeren</button>
+          </div>
+        </div>
+
+        <div class="summary-grid">
+          <article class="stat-card">
+            <span>Hardware & Zubehör</span>
+            <strong id="hardware-total">0,00 €</strong>
+          </article>
+          <article class="stat-card">
+            <span>Software laufend</span>
+            <strong id="software-total">0,00 €</strong>
+          </article>
+          <article class="stat-card">
+            <span>Dienstleistungen</span>
+            <strong id="service-total">0,00 €</strong>
+          </article>
+          <article class="stat-card">
+            <span>Gewicht</span>
+            <strong id="weight-total">0 g</strong>
+          </article>
+        </div>
+
+        <div class="table-wrap cart-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Position</th>
+                <th class="num">Menge</th>
+                <th class="num">Monate</th>
+                <th class="num">Rabatt</th>
+                <th class="num">Summe</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody id="cart-body"></tbody>
+          </table>
+          <div class="empty-state" id="empty-cart">Noch keine Positionen in der Kalkulation.</div>
+        </div>
+
+        <div class="export-row">
+          <span>Preise werden lokal im Browser berechnet.</span>
+          <div class="action-row">
+            <button class="btn btn-secondary" id="csv-btn">CSV Export</button>
+            <button class="btn btn-primary" id="print-btn">Drucken / PDF</button>
+          </div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>

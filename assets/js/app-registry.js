@@ -18,6 +18,15 @@
     url: 'apps/payload-decoder-builder/'
   },
   {
+    id: 'project-calculator',
+    title: 'Projektkalkulator',
+    description: 'Produkte und Dienstleistungen auswählen, Mengen kalkulieren und Projektkosten als CSV oder PDF ausgeben.',
+    category: 'Kalkulation',
+    badge: 'New',
+    icon: '€',
+    url: 'apps/project-calculator/'
+  },
+  {
     id: 'device-import',
     title: 'Device Import',
     description: 'Platzhalter für eine kommende App zum Geräteimport und zur Vorvalidierung.',
