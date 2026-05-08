@@ -37,15 +37,6 @@
       </div>
     </header>
 
-    <section class="panel project-panel">
-      <input id="project-name" type="text" placeholder="Projektname">
-      <input id="customer-name" type="text" placeholder="Kunde">
-      <select id="vat-mode">
-        <option value="net">Netto anzeigen</option>
-        <option value="gross">Brutto inkl. 19%</option>
-      </select>
-    </section>
-
     <main class="workspace">
       <section class="panel catalog-panel">
         <div class="section-head">
@@ -63,7 +54,9 @@
             <thead>
               <tr>
                 <th>Artikel</th>
+                <th>Hersteller</th>
                 <th>Gruppe</th>
+                <th>Einheit</th>
                 <th class="num">Preis</th>
                 <th></th>
               </tr>
@@ -73,62 +66,82 @@
         </div>
       </section>
 
-      <section class="panel calc-panel">
-        <div class="section-head">
-          <div>
-            <h2>Kalkulation</h2>
-            <p>BLP Sensise als Preisbasis</p>
+      <div class="calc-layout">
+        <section class="panel calc-panel">
+          <div class="section-head">
+            <div>
+              <h2>Warenkorb</h2>
+              <p>Alle ausgewählten Positionen für das Projekt</p>
+            </div>
+            <div class="action-row">
+              <button class="btn btn-secondary" id="starter-btn">Starterpaket</button>
+              <button class="btn btn-secondary" id="clear-btn">Leeren</button>
+            </div>
           </div>
-          <div class="action-row">
-            <button class="btn btn-secondary" id="starter-btn">Starterpaket</button>
-            <button class="btn btn-secondary" id="clear-btn">Leeren</button>
+
+          <div class="table-wrap cart-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Position</th>
+                  <th class="num">Menge</th>
+                  <th class="num">Monate</th>
+                  <th class="num">Rabatt</th>
+                  <th class="num">Summe</th>
+                  <th></th>
+                </tr>
+              </thead>
+              <tbody id="cart-body"></tbody>
+            </table>
+            <div class="empty-state" id="empty-cart">Noch keine Positionen in der Kalkulation.</div>
           </div>
-        </div>
 
-        <div class="summary-grid">
-          <article class="stat-card">
-            <span>Hardware & Zubehör</span>
-            <strong id="hardware-total">0,00 €</strong>
-          </article>
-          <article class="stat-card">
-            <span>Software laufend</span>
-            <strong id="software-total">0,00 €</strong>
-          </article>
-          <article class="stat-card">
-            <span>Dienstleistungen</span>
-            <strong id="service-total">0,00 €</strong>
-          </article>
-          <article class="stat-card">
-            <span>Gewicht</span>
-            <strong id="weight-total">0 g</strong>
-          </article>
-        </div>
-
-        <div class="table-wrap cart-wrap">
-          <table>
-            <thead>
-              <tr>
-                <th>Position</th>
-                <th class="num">Menge</th>
-                <th class="num">Monate</th>
-                <th class="num">Rabatt</th>
-                <th class="num">Summe</th>
-                <th></th>
-              </tr>
-            </thead>
-            <tbody id="cart-body"></tbody>
-          </table>
-          <div class="empty-state" id="empty-cart">Noch keine Positionen in der Kalkulation.</div>
-        </div>
-
-        <div class="export-row">
-          <span>Preise werden lokal im Browser berechnet.</span>
-          <div class="action-row">
-            <button class="btn btn-secondary" id="csv-btn">CSV Export</button>
-            <button class="btn btn-primary" id="print-btn">Drucken / PDF</button>
+          <div class="export-row">
+            <span>Preise werden lokal im Browser berechnet.</span>
+            <div class="action-row">
+              <button class="btn btn-secondary" id="csv-btn">CSV Export</button>
+              <button class="btn btn-primary" id="print-btn">Drucken / PDF</button>
+            </div>
           </div>
-        </div>
-      </section>
+        </section>
+
+        <aside class="panel side-panel">
+          <div class="section-head">
+            <div>
+              <h2>Projekt</h2>
+              <p>Details und Summen</p>
+            </div>
+          </div>
+
+          <div class="project-panel">
+            <input id="project-name" type="text" placeholder="Projektname">
+            <input id="customer-name" type="text" placeholder="Kunde">
+            <select id="vat-mode">
+              <option value="net">Netto anzeigen</option>
+              <option value="gross">Brutto inkl. 19%</option>
+            </select>
+          </div>
+
+          <div class="summary-grid">
+            <article class="stat-card">
+              <span>Hardware & Zubehör</span>
+              <strong id="hardware-total">0,00 €</strong>
+            </article>
+            <article class="stat-card">
+              <span>Software laufend</span>
+              <strong id="software-total">0,00 €</strong>
+            </article>
+            <article class="stat-card">
+              <span>Dienstleistungen</span>
+              <strong id="service-total">0,00 €</strong>
+            </article>
+            <article class="stat-card">
+              <span>Gewicht</span>
+              <strong id="weight-total">0 g</strong>
+            </article>
+          </div>
+        </aside>
+      </div>
     </main>
   </div>
 

@@ -152,9 +152,11 @@ function renderCatalog() {
     <tr>
       <td>
         <span class="article-title">${escapeHtml(product.name)}</span>
-        <span class="article-meta">${escapeHtml(product.sku)} · ${escapeHtml(product.unit)}</span>
+        <span class="article-meta">${escapeHtml(product.sku)}</span>
       </td>
+      <td>${escapeHtml(product.manufacturer)}</td>
       <td><span class="pill">${escapeHtml(product.category)}</span></td>
+      <td>${escapeHtml(product.unit)}</td>
       <td class="num">${euro.format(product.price)}</td>
       <td class="num"><button class="icon-btn" data-add="${product.id}" title="Hinzufügen">+</button></td>
     </tr>
