@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sensise Terminbuchung</title>
+  <link rel="stylesheet" href="../../assets/css/theme.css">
+  <link rel="stylesheet" href="app.css">
+</head>
+<body>
+  <div class="container app-shell">
+    <div class="app-topbar">
+      <a class="btn btn-secondary" href="../../index.html">Zurück zur Startseite</a>
+      <div class="brand-lockup">
+        <img class="brand-logo" src="../../assets/img/sensise-logo-neg.png" alt="Sensise Logo">
+      </div>
+    </div>
+
+    <header class="hero">
+      <span class="eyebrow">Kalender</span>
+      <h1>Termin buchen</h1>
+    </header>
+
+    <main class="booking-layout">
+      <section class="panel control-panel">
+        <div class="section-head">
+          <div>
+            <h2>Verfügbarkeit</h2>
+            <p>Freie Zeitfenster werden aus dem öffentlichen ICS-Kalender berechnet.</p>
+          </div>
+        </div>
+
+        <div class="settings-grid">
+          <label>
+            <span>Kalender-URL</span>
+            <input id="ics-url" type="url">
+          </label>
+          <label>
+            <span>Empfänger E-Mail</span>
+            <input id="owner-email" type="email" value="luca-jon.georg@thermokon.de">
+          </label>
+          <label>
+            <span>Dauer</span>
+            <select id="duration">
+              <option value="15">15 Minuten</option>
+              <option value="30" selected>30 Minuten</option>
+              <option value="45">45 Minuten</option>
+              <option value="60">60 Minuten</option>
+            </select>
+          </label>
+          <label>
+            <span>Zeitraum</span>
+            <select id="range-days">
+              <option value="7">7 Tage</option>
+              <option value="14" selected>14 Tage</option>
+              <option value="30">30 Tage</option>
+            </select>
+          </label>
+          <label>
+            <span>Arbeitsbeginn</span>
+            <input id="work-start" type="time" value="08:00">
+          </label>
+          <label>
+            <span>Arbeitsende</span>
+            <input id="work-end" type="time" value="17:00">
+          </label>
+        </div>
+
+        <div class="action-row">
+          <button class="btn btn-primary" id="load-btn" type="button">Kalender laden</button>
+          <label class="btn btn-secondary file-btn">
+            ICS Datei öffnen
+            <input id="ics-file" type="file" accept=".ics,text/calendar">
+          </label>
+        </div>
+
+        <div id="status" class="status">Noch nicht geladen.</div>
+      </section>
+
+      <section class="panel slots-panel">
+        <div class="section-head">
+          <div>
+            <h2>Kalender</h2>
+            <p id="slots-meta">Wähle ein freies Zeitfenster aus.</p>
+          </div>
+        </div>
+
+        <div id="calendar-board" class="calendar-board"></div>
+        <div id="slots-list" class="slots-list"></div>
+      </section>
+
+      <aside class="panel booking-panel">
+        <div class="section-head">
+          <div>
+            <h2>Buchungsanfrage</h2>
+            <p id="selected-slot-label">Noch kein Termin ausgewählt.</p>
+          </div>
+        </div>
+
+        <form id="booking-form" class="booking-form">
+          <label>
+            <span>Name *</span>
+            <input id="requester-name" required placeholder="Vor- und Nachname">
+          </label>
+          <label>
+            <span>E-Mail *</span>
+            <input id="requester-email" type="email" required placeholder="name@firma.de">
+          </label>
+          <label>
+            <span>Firma</span>
+            <input id="requester-company" placeholder="Unternehmen">
+          </label>
+          <label>
+            <span>Thema *</span>
+            <input id="meeting-topic" required placeholder="Worum geht es?">
+          </label>
+          <label>
+            <span>Nachricht</span>
+            <textarea id="meeting-note" rows="5" placeholder="Kurzinfo, Projekt, Link oder Rückfragen"></textarea>
+          </label>
+
+          <div class="booking-actions">
+            <button class="btn btn-secondary" id="download-ics" type="button" disabled>ICS herunterladen</button>
+            <button class="btn btn-primary" id="mail-request" type="submit" disabled>Anfrage per Mail</button>
+          </div>
+        </form>
+      </aside>
+    </main>
+  </div>
+
+  <script src="app.js?v=3"></script>
+</body>
+</html>

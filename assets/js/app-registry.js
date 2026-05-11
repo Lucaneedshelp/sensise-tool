@@ -25,5 +25,14 @@
     badge: 'New',
     icon: '€',
     url: 'apps/project-calculator/'
+  },
+  {
+    id: 'calendar-booking',
+    title: 'Terminbuchung',
+    description: 'Öffentlichen Outlook-ICS-Kalender anzeigen, freie Slots berechnen und Buchungsanfragen vorbereiten.',
+    category: 'Kalender',
+    badge: 'New',
+    icon: '30',
+    url: 'apps/calendar-booking/'
   }
 ];
