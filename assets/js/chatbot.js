@@ -89,7 +89,7 @@ function createChatbot() {
     } catch (error) {
       chatbotState.messages.push({
         role: 'assistant',
-        content: `Ich konnte den Chat-Server nicht erreichen. Starte die Seite über den lokalen Server und prüfe die OPENAI_API_KEY-Konfiguration. (${error.message})`
+        content: `Ich konnte den Chat-Server nicht erreichen. Starte die Seite über den lokalen Server und prüfe die API-Key-Konfiguration in der .env. (${error.message})`
       });
     } finally {
       chatbotState.busy = false;
