@@ -1,10 +1,15 @@
 const DEFAULT_ICS_URL = 'https://outlook.office365.com/owa/calendar/0a43a3313a6140d3ab20331348d665f2@thermokon.de/8b53a825b48c4adc9281eb67987ab3508190174971116413725/calendar.ics';
 const DEFAULT_ZONE_LABEL = 'Europe/Berlin';
-const LOCAL_PROXY_URL = 'calendar.ics';
+const LOCAL_PROXY_URL = 'http://localhost:4177/apps/calendar-booking/calendar.ics';
+const DAILY_BLOCKS = [
+  { start: '09:30', end: '10:00' },
+  { start: '12:00', end: '13:00' }
+];
 
 const state = {
   events: [],
-  selectedSlot: null
+  selectedSlots: [],
+  weekOffset: 0
 };
 
 const els = {
@@ -14,9 +19,14 @@ const els = {
   rangeDays: document.getElementById('range-days'),
   workStart: document.getElementById('work-start'),
   workEnd: document.getElementById('work-end'),
+  bookingStart: document.getElementById('booking-start'),
+  bookingEnd: document.getElementById('booking-end'),
   loadBtn: document.getElementById('load-btn'),
   fileInput: document.getElementById('ics-file'),
   status: document.getElementById('status'),
+  prevWeek: document.getElementById('prev-week'),
+  todayWeek: document.getElementById('today-week'),
+  nextWeek: document.getElementById('next-week'),
   slotsMeta: document.getElementById('slots-meta'),
   calendarBoard: document.getElementById('calendar-board'),
   slotsList: document.getElementById('slots-list'),
@@ -27,8 +37,7 @@ const els = {
   requesterCompany: document.getElementById('requester-company'),
   meetingTopic: document.getElementById('meeting-topic'),
   meetingNote: document.getElementById('meeting-note'),
-  mailRequest: document.getElementById('mail-request'),
-  downloadIcs: document.getElementById('download-ics')
+  mailRequest: document.getElementById('mail-request')
 };
 
 const dateLabel = new Intl.DateTimeFormat('de-DE', {
@@ -211,12 +220,42 @@ function overlaps(aStart, aEnd, bStart, bEnd) {
   return aStart < bEnd && aEnd > bStart;
 }
 
+function mergeBusy(events) {
+  return events
+    .slice()
+    .sort((a, b) => a.start - b.start)
+    .reduce((acc, event) => {
+      const last = acc[acc.length - 1];
+      if (!last || event.start > last.end) {
+        acc.push({ start: event.start, end: event.end });
+        return acc;
+      }
+      if (event.end > last.end) last.end = event.end;
+      return acc;
+    }, []);
+}
+
+function buildFreeBlocks(dayStart, dayEnd, busy) {
+  const blocks = [];
+  let cursor = dayStart;
+  mergeBusy(busy).forEach(event => {
+    if (event.start > cursor) {
+      blocks.push({ start: cursor, end: new Date(Math.min(event.start, dayEnd)) });
+    }
+    if (event.end > cursor) cursor = new Date(Math.min(event.end, dayEnd));
+  });
+  if (cursor < dayEnd) blocks.push({ start: cursor, end: dayEnd });
+  return blocks.filter(block => (block.end - block.start) / 60000 >= Number(els.duration.value));
+}
+
 function buildSlots() {
-  const today = startOfDay(new Date());
+  const today = startOfDay(addDays(new Date(), state.weekOffset * 7));
   const rangeDays = Number(els.rangeDays.value);
   const duration = Number(els.duration.value);
   const workStart = minutesFromInput(els.workStart.value);
   const workEnd = minutesFromInput(els.workEnd.value);
+  const bookingStart = minutesFromInput(els.bookingStart.value);
+  const bookingEnd = minutesFromInput(els.bookingEnd.value);
   const rangeEnd = addDays(today, rangeDays);
   const events = normalizeEvents(state.events, today, rangeEnd);
   const days = [];
@@ -227,22 +266,54 @@ function buildSlots() {
 
     const dayStart = dateAtMinutes(day, workStart);
     const dayEnd = dateAtMinutes(day, workEnd);
-    const busy = events.filter(event => overlaps(event.start, event.end, dayStart, dayEnd));
-    const slots = [];
-
-    for (let minutes = workStart; minutes + duration <= workEnd; minutes += 15) {
-      const start = dateAtMinutes(day, minutes);
-      const end = new Date(start.getTime() + duration * 60 * 1000);
-      if (start < new Date()) continue;
-      if (!busy.some(event => overlaps(start, end, event.start, event.end))) {
-        slots.push({ start, end });
-      }
-    }
+    const bookableStart = dateAtMinutes(day, bookingStart);
+    const bookableEnd = dateAtMinutes(day, bookingEnd);
+    const fixedBlocks = DAILY_BLOCKS.map(block => ({
+      start: dateAtMinutes(day, minutesFromInput(block.start)),
+      end: dateAtMinutes(day, minutesFromInput(block.end)),
+      fixed: true
+    }));
+    const busy = [
+      ...events.filter(event => overlaps(event.start, event.end, dayStart, dayEnd)),
+      ...fixedBlocks
+    ].sort((a, b) => a.start - b.start);
+    const slots = buildFreeBlocks(bookableStart, bookableEnd, busy)
+      .flatMap(block => buildBookableSlots(block, duration));
 
     days.push({ day, slots, busy });
   }
 
   return days;
+}
+
+function getVisibleRangeLabel(days) {
+  const visibleDays = days.filter(day => ![0, 6].includes(day.day.getDay())).slice(0, 5);
+  if (!visibleDays.length) return 'Wähle bis zu drei Terminvorschläge aus.';
+  const first = visibleDays[0].day;
+  const last = visibleDays[visibleDays.length - 1].day;
+  return `${dateLabel.format(first)} bis ${dateLabel.format(last)}`;
+}
+
+function roundUpToStep(date, stepMinutes) {
+  const rounded = new Date(date);
+  const minutes = rounded.getMinutes();
+  const remainder = minutes % stepMinutes;
+  if (remainder) rounded.setMinutes(minutes + stepMinutes - remainder, 0, 0);
+  else rounded.setSeconds(0, 0);
+  return rounded;
+}
+
+function buildBookableSlots(block, durationMinutes) {
+  const slots = [];
+  let cursor = block.start < new Date() ? roundUpToStep(new Date(), durationMinutes) : block.start;
+
+  while (cursor.getTime() + durationMinutes * 60 * 1000 <= block.end.getTime()) {
+    const end = new Date(cursor.getTime() + durationMinutes * 60 * 1000);
+    slots.push({ start: cursor, end });
+    cursor = end;
+  }
+
+  return slots;
 }
 
 function minutesSinceWorkStart(date) {
@@ -274,22 +345,12 @@ function renderCalendar(days) {
     return;
   }
 
-  function nonOverlappingSlots(slots) {
-    let lastEnd = 0;
-    return slots.filter(slot => {
-      if (slot.start.getTime() < lastEnd) return false;
-      lastEnd = slot.end.getTime();
-      return true;
-    });
-  }
-
   els.calendarBoard.innerHTML = `
     <div class="calendar-grid" style="--day-count:${visibleDays.length};--calendar-height:${hourCount * 72}px;--hour-height:72px;">
       <div class="calendar-corner"></div>
       ${visibleDays.map(day => `
         <div class="calendar-day-head">
           <strong>${dateLabel.format(day.day)}</strong>
-          <span>${day.slots.length} freie Slots</span>
         </div>
       `).join('')}
       <div class="time-axis">
@@ -302,9 +363,9 @@ function renderCalendar(days) {
           ${day.busy.map(event => `
             <div class="calendar-busy" style="${blockStyle(event.start, event.end)}">belegt</div>
           `).join('')}
-          ${nonOverlappingSlots(day.slots).map(slot => `
+          ${day.slots.map(slot => `
             <button class="calendar-free" type="button" data-start="${slot.start.toISOString()}" data-end="${slot.end.toISOString()}" style="${blockStyle(slot.start, slot.end)}">
-              ${timeLabel.format(slot.start)}
+              ${timeLabel.format(slot.start)} - ${timeLabel.format(slot.end)}
             </button>
           `).join('')}
         </div>
@@ -316,8 +377,9 @@ function renderCalendar(days) {
 function renderSlots() {
   const days = buildSlots();
   const slotCount = days.reduce((total, day) => total + day.slots.length, 0);
-  els.slotsMeta.textContent = `${slotCount} freie Zeitfenster in den nächsten ${els.rangeDays.value} Tagen.`;
+  els.slotsMeta.textContent = getVisibleRangeLabel(days);
   renderCalendar(days);
+  renderSelectedSlots();
 
   if (!slotCount) {
     els.slotsList.innerHTML = '<div class="empty-state">Keine freien Zeitfenster im gewählten Zeitraum gefunden.</div>';
@@ -354,7 +416,7 @@ async function loadRemoteCalendar() {
     const text = await fetchCalendarText();
     state.events = parseCalendar(text);
     renderSlots();
-    setStatus(`${state.events.length} Kalendereinträge geladen.`, 'ok');
+    setStatus('Kalender aktuell', 'ok');
   } catch (error) {
     els.calendarBoard.innerHTML = '<div class="empty-state">Der Kalender konnte nicht geladen werden.</div>';
     els.slotsList.innerHTML = '<div class="empty-state">Starte die App über den lokalen Kalender-Server oder öffne eine ICS-Datei.</div>';
@@ -364,10 +426,7 @@ async function loadRemoteCalendar() {
 
 async function fetchCalendarText() {
   const directUrl = els.icsUrl.value.trim();
-  const attempts = [];
-  if (location.protocol !== 'file:') {
-    attempts.push(`${LOCAL_PROXY_URL}?url=${encodeURIComponent(directUrl)}`);
-  }
+  const attempts = [`${LOCAL_PROXY_URL}?url=${encodeURIComponent(directUrl)}`];
   attempts.push(directUrl);
 
   let lastError = null;
@@ -388,88 +447,64 @@ function loadFileCalendar(file) {
   reader.onload = () => {
     state.events = parseCalendar(String(reader.result));
     renderSlots();
-    setStatus(`${state.events.length} Kalendereinträge aus Datei geladen.`, 'ok');
+    setStatus('Kalender aktuell', 'ok');
   };
   reader.onerror = () => setStatus('Die ICS-Datei konnte nicht gelesen werden.', 'error');
   reader.readAsText(file);
 }
 
 function selectSlot(startIso, endIso) {
-  state.selectedSlot = {
+  const slot = {
     start: new Date(startIso),
-    end: new Date(endIso)
+    end: new Date(endIso),
+    duration: Number(els.duration.value)
   };
-  document.querySelectorAll('.slot-btn.selected').forEach(button => button.classList.remove('selected'));
-  document.querySelectorAll('.calendar-free.selected').forEach(button => button.classList.remove('selected'));
-  document.querySelectorAll(`[data-start="${startIso}"]`).forEach(button => button.classList.add('selected'));
 
-  els.selectedSlotLabel.textContent = `${dateLabel.format(state.selectedSlot.start)}, ${timeLabel.format(state.selectedSlot.start)} - ${timeLabel.format(state.selectedSlot.end)}`;
+  const key = getSlotKey(slot);
+  const existing = state.selectedSlots.findIndex(item => getSlotKey(item) === key);
+  if (existing >= 0) {
+    state.selectedSlots.splice(existing, 1);
+  } else if (state.selectedSlots.length < 3) {
+    state.selectedSlots.push(slot);
+  }
+  renderSelectedSlots();
+}
+
+function getSlotKey(slot) {
+  return `${slot.start.toISOString()}-${slot.duration}`;
+}
+
+function renderSelectedSlots() {
+  document.querySelectorAll('.slot-btn.selected, .calendar-free.selected').forEach(button => button.classList.remove('selected'));
+  state.selectedSlots.forEach(slot => {
+    document.querySelectorAll(`[data-start="${slot.start.toISOString()}"]`).forEach(button => button.classList.add('selected'));
+  });
+
+  if (!state.selectedSlots.length) {
+    els.selectedSlotLabel.textContent = 'Noch kein Termin ausgewählt.';
+    els.mailRequest.disabled = true;
+    return;
+  }
+
+  els.selectedSlotLabel.innerHTML = state.selectedSlots
+    .map((slot, index) => `<span>${index + 1}. ${dateLabel.format(slot.start)}, ${timeLabel.format(slot.start)} - ${timeLabel.format(slot.end)}</span>`)
+    .join('');
   els.mailRequest.disabled = false;
-  els.downloadIcs.disabled = false;
-}
-
-function toIcsDate(date) {
-  return date.toISOString().replace(/[-:]/g, '').replace(/\.\d{3}/, '');
-}
-
-function createBookingIcs() {
-  const topic = els.meetingTopic.value || 'Termin';
-  const company = els.requesterCompany.value ? ` (${els.requesterCompany.value})` : '';
-  const description = [
-    `Anfrage von: ${els.requesterName.value}${company}`,
-    `E-Mail: ${els.requesterEmail.value}`,
-    '',
-    els.meetingNote.value
-  ].join('\\n');
-
-  return [
-    'BEGIN:VCALENDAR',
-    'VERSION:2.0',
-    'PRODID:-//Sensise//Terminbuchung//DE',
-    'METHOD:REQUEST',
-    'BEGIN:VEVENT',
-    `UID:${crypto.randomUUID ? crypto.randomUUID() : Date.now()}@sensise-booking`,
-    `DTSTAMP:${toIcsDate(new Date())}`,
-    `DTSTART:${toIcsDate(state.selectedSlot.start)}`,
-    `DTEND:${toIcsDate(state.selectedSlot.end)}`,
-    `SUMMARY:${escapeIcsText(topic)}`,
-    `DESCRIPTION:${escapeIcsText(description)}`,
-    'LOCATION:Microsoft Teams / nach Vereinbarung',
-    'END:VEVENT',
-    'END:VCALENDAR'
-  ].join('\r\n');
-}
-
-function escapeIcsText(value) {
-  return String(value || '')
-    .replace(/\\/g, '\\\\')
-    .replace(/\n/g, '\\n')
-    .replace(/,/g, '\\,')
-    .replace(/;/g, '\\;');
-}
-
-function downloadBookingIcs() {
-  if (!state.selectedSlot || !els.bookingForm.reportValidity()) return;
-  const blob = new Blob([createBookingIcs()], { type: 'text/calendar;charset=utf-8' });
-  const link = document.createElement('a');
-  link.href = URL.createObjectURL(blob);
-  link.download = `terminanfrage-${state.selectedSlot.start.toISOString().slice(0, 10)}.ics`;
-  document.body.appendChild(link);
-  link.click();
-  document.body.removeChild(link);
-  URL.revokeObjectURL(link.href);
 }
 
 function sendMailRequest(event) {
   event.preventDefault();
-  if (!state.selectedSlot || !els.bookingForm.reportValidity()) return;
+  if (!state.selectedSlots.length || !els.bookingForm.reportValidity()) return;
 
   const subject = `Terminanfrage: ${els.meetingTopic.value}`;
+  const slotLines = state.selectedSlots.map((slot, index) =>
+    `${index + 1}. ${dateLabel.format(slot.start)}, ${timeLabel.format(slot.start)} - ${timeLabel.format(slot.end)} (${DEFAULT_ZONE_LABEL})`
+  );
   const body = [
     'Hallo Luca,',
     '',
-    'ich möchte gerne folgenden Termin anfragen:',
-    `${dateLabel.format(state.selectedSlot.start)}, ${timeLabel.format(state.selectedSlot.start)} - ${timeLabel.format(state.selectedSlot.end)} (${DEFAULT_ZONE_LABEL})`,
+    'ich möchte gerne einen dieser Termine anfragen:',
+    ...slotLines,
     '',
     `Name: ${els.requesterName.value}`,
     `E-Mail: ${els.requesterEmail.value}`,
@@ -490,10 +525,26 @@ function bindEvents() {
     const [file] = event.target.files;
     if (file) loadFileCalendar(file);
   });
-  [els.duration, els.rangeDays, els.workStart, els.workEnd].forEach(input => {
+  [els.duration, els.rangeDays, els.workStart, els.workEnd, els.bookingStart, els.bookingEnd].forEach(input => {
     input.addEventListener('change', () => {
+      state.selectedSlots = [];
       if (state.events.length) renderSlots();
     });
+  });
+  els.prevWeek.addEventListener('click', () => {
+    state.weekOffset -= 1;
+    state.selectedSlots = [];
+    renderSlots();
+  });
+  els.todayWeek.addEventListener('click', () => {
+    state.weekOffset = 0;
+    state.selectedSlots = [];
+    renderSlots();
+  });
+  els.nextWeek.addEventListener('click', () => {
+    state.weekOffset += 1;
+    state.selectedSlots = [];
+    renderSlots();
   });
   els.slotsList.addEventListener('click', event => {
     const button = event.target.closest('[data-start]');
@@ -506,7 +557,6 @@ function bindEvents() {
     selectSlot(button.dataset.start, button.dataset.end);
   });
   els.bookingForm.addEventListener('submit', sendMailRequest);
-  els.downloadIcs.addEventListener('click', downloadBookingIcs);
 }
 
 function init() {

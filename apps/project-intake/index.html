@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sensise Projektaufnahme</title>
+  <link rel="stylesheet" href="../../assets/css/theme.css">
+  <link rel="stylesheet" href="app.css">
+</head>
+<body>
+  <div class="container app-shell">
+    <div class="app-topbar">
+      <a class="btn btn-secondary" href="../../index.html">Zurück zur Startseite</a>
+      <div class="brand-lockup">
+        <img class="brand-logo" src="../../assets/img/sensise-logo-neg.png" alt="Sensise Logo">
+      </div>
+    </div>
+
+    <header class="hero">
+      <div>
+        <span class="eyebrow">Projektaufnahme</span>
+        <h1>Projekt anlegen</h1>
+      </div>
+    </header>
+
+    <main class="workspace">
+      <form id="project-form" class="project-grid">
+        <section class="panel intake-panel">
+          <div class="section-head">
+            <div>
+              <h2>Projekt</h2>
+              <p>Basisdaten für Projektordner, Übergabe und Rückfragen.</p>
+            </div>
+          </div>
+
+          <div class="form-grid two">
+            <label>
+              <span>Projektname *</span>
+              <input id="project-name" name="projectName" required placeholder="z. B. Quartier West BA2">
+            </label>
+            <label>
+              <span>Kunde *</span>
+              <input id="customer-name" name="customerName" required placeholder="Kundenname">
+            </label>
+            <label>
+              <span>Vertrieb *</span>
+              <input id="sales-owner" name="salesOwner" required placeholder="Name">
+            </label>
+            <label>
+              <span>Gewünschte Rückmeldung bis</span>
+              <input id="due-date" name="dueDate" type="date">
+            </label>
+            <label>
+              <span>Projektphase</span>
+              <select id="project-stage" name="projectStage">
+                <option>Anfrage / Erstbewertung</option>
+                <option>Ausschreibung</option>
+                <option>Technische Klärung</option>
+                <option>Angebotserstellung</option>
+                <option>Umsetzung geplant</option>
+              </select>
+            </label>
+            <label>
+              <span>Priorität</span>
+              <select id="priority" name="priority">
+                <option>Normal</option>
+                <option>Hoch</option>
+                <option>Termin kritisch</option>
+              </select>
+            </label>
+          </div>
+        </section>
+
+        <section class="panel intake-panel">
+          <div class="section-head">
+            <div>
+              <h2>Kunde & Standort</h2>
+              <p>Technische Einordnung, Ansprechpartner und Objektkontext.</p>
+            </div>
+          </div>
+
+          <div class="form-grid two">
+            <label>
+              <span>Objekt / Standort</span>
+              <input id="site-name" name="siteName" placeholder="Gebäude, Werk, Liegenschaft">
+            </label>
+            <label>
+              <span>Adresse</span>
+              <input id="site-address" name="siteAddress" placeholder="Straße, PLZ Ort">
+            </label>
+            <label>
+              <span>Ansprechpartner Kunde</span>
+              <input id="contact-name" name="contactName" placeholder="Name">
+            </label>
+            <label>
+              <span>E-Mail / Telefon</span>
+              <input id="contact-details" name="contactDetails" placeholder="Kontakt">
+            </label>
+            <label>
+              <span>Gebäudetyp</span>
+              <select id="building-type" name="buildingType">
+                <option>Büro / Verwaltung</option>
+                <option>Industrie / Produktion</option>
+                <option>Hotel / Hospitality</option>
+                <option>Bildung / Campus</option>
+                <option>Healthcare</option>
+                <option>Wohnen / Quartier</option>
+                <option>Sonstiges</option>
+              </select>
+            </label>
+            <label>
+              <span>Bestand oder Neubau</span>
+              <select id="building-state" name="buildingState">
+                <option>Bestand</option>
+                <option>Neubau</option>
+                <option>Modernisierung</option>
+                <option>Noch offen</option>
+              </select>
+            </label>
+          </div>
+        </section>
+
+        <section class="panel intake-panel wide">
+          <div class="section-head">
+            <div>
+              <h2>Sensise Leistungsumfang</h2>
+              <p>Auswahl für Solution Engineering, abgeleitet aus Sensise/Individual Projektleistungen.</p>
+            </div>
+          </div>
+
+          <div class="service-grid" id="service-options"></div>
+        </section>
+
+        <section class="panel intake-panel wide">
+          <div class="section-head">
+            <div>
+              <h2>Technische Anforderungen</h2>
+              <p>Alles, was später Rückfragen und Schleifen spart.</p>
+            </div>
+          </div>
+
+          <div class="form-grid two">
+            <label>
+              <span>Anwendungsfall *</span>
+              <textarea id="use-case" name="useCase" required rows="5" placeholder="Was soll gemessen, überwacht, geregelt oder ausgewertet werden?"></textarea>
+            </label>
+            <label>
+              <span>Rahmenbedingungen</span>
+              <textarea id="constraints" name="constraints" rows="5" placeholder="Funkabdeckung, Montageorte, IT-Vorgaben, Schnittstellen, BACnet/Modbus/API, Datenschutz..."></textarea>
+            </label>
+            <label>
+              <span>Erwartetes Ergebnis</span>
+              <textarea id="expected-result" name="expectedResult" rows="4" placeholder="Angebot, Konzept, Stückliste, Gateway-Planung, Installation, Schulung..."></textarea>
+            </label>
+            <label>
+              <span>Offene Punkte</span>
+              <textarea id="open-questions" name="openQuestions" rows="4" placeholder="Was ist noch unklar?"></textarea>
+            </label>
+          </div>
+        </section>
+
+        <section class="panel catalog-panel wide">
+          <div class="section-head">
+            <div>
+              <h2>Produkte & Services</h2>
+              <p id="result-count">0 Treffer</p>
+            </div>
+            <div class="action-row">
+              <button class="btn btn-secondary" type="button" id="starter-btn">Starterpaket</button>
+              <button class="btn btn-secondary" type="button" id="clear-btn">Leeren</button>
+            </div>
+          </div>
+
+          <div class="catalog-tools">
+            <input id="search" type="search" placeholder="Suchen nach Sensor, Gateway, Dienstleistung...">
+            <select id="category-filter"></select>
+          </div>
+
+          <div class="selector-layout">
+            <div class="table-wrap catalog-wrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Artikel</th>
+                    <th>Gruppe</th>
+                    <th>Einheit</th>
+                    <th class="num">Preis</th>
+                    <th></th>
+                  </tr>
+                </thead>
+                <tbody id="catalog-body"></tbody>
+              </table>
+            </div>
+
+            <aside class="cart-box">
+              <h3>Auswahl</h3>
+              <div id="cart-body" class="cart-list"></div>
+              <div class="empty-state" id="empty-cart">Noch keine Positionen ausgewählt.</div>
+              <div class="summary-grid">
+                <article class="stat-card">
+                  <span>Hardware & Zubehör</span>
+                  <strong id="hardware-total">0,00 €</strong>
+                </article>
+                <article class="stat-card">
+                  <span>Software laufend</span>
+                  <strong id="software-total">0,00 €</strong>
+                </article>
+                <article class="stat-card">
+                  <span>Dienstleistungen</span>
+                  <strong id="service-total">0,00 €</strong>
+                </article>
+              </div>
+            </aside>
+          </div>
+        </section>
+
+        <section class="panel intake-panel">
+          <div class="section-head">
+            <div>
+              <h2>Dateien</h2>
+              <p>Pläne, Ausschreibung, Fotos oder Excel-Dateien für SharePoint.</p>
+            </div>
+          </div>
+
+          <label class="file-drop">
+            <span>Dateien auswählen</span>
+            <input id="attachments" type="file" multiple>
+          </label>
+          <div id="file-list" class="file-list"></div>
+        </section>
+
+        <section class="panel intake-panel">
+          <div class="section-head">
+            <div>
+              <h2>Power Automate</h2>
+              <p>HTTP-Trigger-URL eintragen, testen und später in SharePoint verarbeiten.</p>
+            </div>
+          </div>
+
+          <div class="form-grid">
+            <label>
+              <span>Flow HTTP POST URL</span>
+              <input id="flow-url" type="url" placeholder="https://prod-xx.westeurope.logic.azure.com/...">
+            </label>
+            <label>
+              <span>Notiz an Solution Engineering</span>
+              <textarea id="internal-note" rows="4" placeholder="Zusätzlicher Kontext, Risiken oder Angebotswunsch."></textarea>
+            </label>
+          </div>
+
+          <div class="submit-row">
+            <span id="submit-status" role="status"></span>
+            <div class="action-row">
+              <button class="btn btn-secondary" type="button" id="json-btn">JSON exportieren</button>
+              <button class="btn btn-primary" type="submit">An Power Automate senden</button>
+            </div>
+          </div>
+        </section>
+      </form>
+    </main>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>

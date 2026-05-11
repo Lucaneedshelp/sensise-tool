@@ -2,37 +2,46 @@
   {
     id: 'json-generator',
     title: 'JSON Generator',
-    description: 'Excel-Dateien lokal einlesen, Spalten zuordnen und Sensise-kompatible JSON-Dateien exportieren.',
+    description: 'Excel einlesen und Sensise JSON exportieren.',
     category: 'Daten & Import',
     badge: 'Live',
-    icon: '{ }',
+    icon: 'table',
     url: 'apps/json-generator/'
   },
   {
     id: 'payload-decoder-builder',
     title: 'Payload Decoder Builder',
-    description: 'Payload Decoder analysieren, erkannte Felder auf erlaubte Sensortypen mappen und fertige Wrapper exportieren.',
+    description: 'Decoder prüfen und Sensise Wrapper bauen.',
     category: 'LoRaWAN',
     badge: 'New',
-    icon: 'PD',
+    icon: 'code',
     url: 'apps/payload-decoder-builder/'
   },
   {
     id: 'project-calculator',
     title: 'Projektkalkulator',
-    description: 'Produkte und Dienstleistungen auswählen, Mengen kalkulieren und Projektkosten als CSV oder PDF ausgeben.',
+    description: 'Produkte auswählen und Projektkosten kalkulieren.',
     category: 'Kalkulation',
     badge: 'New',
-    icon: '€',
+    icon: 'calculator',
     url: 'apps/project-calculator/'
+  },
+  {
+    id: 'project-intake',
+    title: 'Projektaufnahme',
+    description: 'Projektinfos für Solution Engineering sammeln.',
+    category: 'Projekt',
+    badge: 'New',
+    icon: 'clipboard',
+    url: 'apps/project-intake/'
   },
   {
     id: 'calendar-booking',
     title: 'Terminbuchung',
-    description: 'Öffentlichen Outlook-ICS-Kalender anzeigen, freie Slots berechnen und Buchungsanfragen vorbereiten.',
+    description: 'Freie Termine anzeigen und Anfragen erstellen.',
     category: 'Kalender',
     badge: 'New',
-    icon: '30',
+    icon: 'calendar',
     url: 'apps/calendar-booking/'
   }
 ];

@@ -7,13 +7,13 @@ body {
   display: flex;
   flex-direction: column;
   justify-content: center;
-  gap: 56px;
+  gap: 48px;
   padding-top: 48px;
   padding-bottom: 48px;
 }
 
 .portal-logo {
-  width: min(560px, 68vw);
+  width: min(520px, 66vw);
   height: auto;
 }
 
@@ -26,9 +26,9 @@ body {
 .app-card {
   display: flex;
   flex-direction: column;
-  gap: 16px;
-  min-height: 190px;
-  padding: 24px;
+  gap: 14px;
+  min-height: 172px;
+  padding: 22px;
   border-radius: var(--radius-lg);
   background: rgba(255, 255, 255, 0.04);
   border: 1px solid var(--color-border);
@@ -39,7 +39,7 @@ body {
 .app-card:hover {
   transform: translateY(-3px);
   border-color: rgba(243, 145, 0, 0.55);
-  background: rgba(255, 255, 255, 0.06);
+  background: rgba(255, 255, 255, 0.065);
 }
 
 .app-card__top {
@@ -50,16 +50,24 @@ body {
 }
 
 .app-card__icon {
-  width: 48px;
-  height: 48px;
-  border-radius: 14px;
+  width: 46px;
+  height: 46px;
+  border-radius: 12px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
   background: rgba(243, 145, 0, 0.14);
   color: var(--color-mustard);
-  font-size: 18px;
-  font-weight: 700;
+}
+
+.app-card__icon svg {
+  width: 23px;
+  height: 23px;
+  stroke: currentColor;
+  stroke-width: 2;
+  fill: none;
+  stroke-linecap: round;
+  stroke-linejoin: round;
 }
 
 .app-card__badge {
@@ -74,20 +82,21 @@ body {
 
 .app-card h3 {
   margin: 0;
-  font-size: 24px;
+  font-size: 23px;
 }
 
 .app-card p {
   margin: 0;
   color: var(--color-text-muted);
-  line-height: 1.6;
+  line-height: 1.5;
+  font-size: 14px;
 }
 
 .app-card__meta {
   margin-top: auto;
   color: var(--color-mustard);
-  font-size: 13px;
-  font-weight: 700;
+  font-size: 12px;
+  font-weight: 800;
   letter-spacing: 0.04em;
   text-transform: uppercase;
 }

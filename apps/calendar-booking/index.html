@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Sensise Terminbuchung</title>
   <link rel="stylesheet" href="../../assets/css/theme.css">
-  <link rel="stylesheet" href="app.css">
+  <link rel="stylesheet" href="app.css?v=10">
 </head>
 <body>
   <div class="container app-shell">
@@ -17,71 +17,42 @@
     </div>
 
     <header class="hero">
-      <span class="eyebrow">Kalender</span>
-      <h1>Termin buchen</h1>
+      <div>
+        <span class="eyebrow">Kalender</span>
+        <h1>Termin buchen</h1>
+      </div>
+      <div class="hero-facts" aria-label="Buchungsrahmen">
+        <span>30-60 Minuten</span>
+        <span>Termine 08:00-16:00 Uhr</span>
+        <span>bis zu 3 Vorschläge</span>
+        <span>Werktage</span>
+      </div>
     </header>
 
     <main class="booking-layout">
-      <section class="panel control-panel">
-        <div class="section-head">
-          <div>
-            <h2>Verfügbarkeit</h2>
-            <p>Freie Zeitfenster werden aus dem öffentlichen ICS-Kalender berechnet.</p>
-          </div>
-        </div>
-
-        <div class="settings-grid">
-          <label>
-            <span>Kalender-URL</span>
-            <input id="ics-url" type="url">
-          </label>
-          <label>
-            <span>Empfänger E-Mail</span>
-            <input id="owner-email" type="email" value="luca-jon.georg@thermokon.de">
-          </label>
-          <label>
-            <span>Dauer</span>
-            <select id="duration">
-              <option value="15">15 Minuten</option>
-              <option value="30" selected>30 Minuten</option>
-              <option value="45">45 Minuten</option>
-              <option value="60">60 Minuten</option>
-            </select>
-          </label>
-          <label>
-            <span>Zeitraum</span>
-            <select id="range-days">
-              <option value="7">7 Tage</option>
-              <option value="14" selected>14 Tage</option>
-              <option value="30">30 Tage</option>
-            </select>
-          </label>
-          <label>
-            <span>Arbeitsbeginn</span>
-            <input id="work-start" type="time" value="08:00">
-          </label>
-          <label>
-            <span>Arbeitsende</span>
-            <input id="work-end" type="time" value="17:00">
-          </label>
-        </div>
-
-        <div class="action-row">
-          <button class="btn btn-primary" id="load-btn" type="button">Kalender laden</button>
-          <label class="btn btn-secondary file-btn">
-            ICS Datei öffnen
-            <input id="ics-file" type="file" accept=".ics,text/calendar">
-          </label>
-        </div>
-
-        <div id="status" class="status">Noch nicht geladen.</div>
-      </section>
+      <div class="hidden-settings" aria-hidden="true">
+        <input id="ics-url" type="url">
+        <input id="owner-email" type="email" value="luca-jon.georg@thermokon.de">
+        <select id="range-days"><option value="14" selected>14 Tage</option></select>
+        <input id="work-start" type="time" value="07:00">
+        <input id="work-end" type="time" value="17:00">
+        <input id="booking-start" type="time" value="08:00">
+        <input id="booking-end" type="time" value="16:00">
+        <button id="load-btn" type="button">Kalender laden</button>
+        <input id="ics-file" type="file" accept=".ics,text/calendar">
+      </div>
 
       <section class="panel slots-panel">
-        <div class="section-head">
+        <div class="section-head calendar-head">
           <div>
             <h2>Kalender</h2>
-            <p id="slots-meta">Wähle ein freies Zeitfenster aus.</p>
+            <p id="slots-meta">Wähle bis zu drei Terminvorschläge aus.</p>
+          </div>
+          <div class="calendar-actions">
+            <button class="calendar-nav-btn" id="prev-week" type="button">‹</button>
+            <button class="calendar-today-btn" id="today-week" type="button">Heute</button>
+            <button class="calendar-nav-btn" id="next-week" type="button">›</button>
+            <div id="status" class="status">Kalender wird geladen...</div>
           </div>
         </div>
 
@@ -90,14 +61,22 @@
       </section>
 
       <aside class="panel booking-panel">
-        <div class="section-head">
+        <div class="booking-card-head">
           <div>
             <h2>Buchungsanfrage</h2>
-            <p id="selected-slot-label">Noch kein Termin ausgewählt.</p>
           </div>
+          <div id="selected-slot-label" class="selected-slot">Noch kein Termin ausgewählt.</div>
         </div>
 
         <form id="booking-form" class="booking-form">
+          <label>
+            <span>Dauer</span>
+            <select id="duration">
+              <option value="30" selected>30 Minuten</option>
+              <option value="45">45 Minuten</option>
+              <option value="60">60 Minuten</option>
+            </select>
+          </label>
           <label>
             <span>Name *</span>
             <input id="requester-name" required placeholder="Vor- und Nachname">
@@ -120,7 +99,6 @@
           </label>
 
           <div class="booking-actions">
-            <button class="btn btn-secondary" id="download-ics" type="button" disabled>ICS herunterladen</button>
             <button class="btn btn-primary" id="mail-request" type="submit" disabled>Anfrage per Mail</button>
           </div>
         </form>
@@ -128,6 +106,6 @@
     </main>
   </div>
 
-  <script src="app.js?v=3"></script>
+  <script src="app.js?v=15"></script>
 </body>
 </html>
