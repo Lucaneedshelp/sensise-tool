@@ -600,6 +600,11 @@ tr:hover td {
     width: 34px;
   }
 
+  .discount-group-label,
+  .discount-chips {
+    display: none !important;
+  }
+
   .article-title,
   .hero-metrics strong,
   .stat-card strong {

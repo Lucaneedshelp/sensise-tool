@@ -1,0 +1,13 @@
+{
+  "name": "sensise-tools",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Sensise tools portal with local Node API endpoints.",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "engines": {
+    "node": ">=22"
+  }
+}

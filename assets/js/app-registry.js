@@ -27,6 +27,15 @@
     url: 'apps/project-calculator/'
   },
   {
+    id: 'roi-calculator',
+    title: 'ROI-Rechner',
+    description: 'Einsparpotenzial und Amortisation berechnen.',
+    category: 'Kalkulation',
+    badge: 'New',
+    icon: 'calculator',
+    url: 'apps/roi-calculator/'
+  },
+  {
     id: 'project-intake',
     title: 'Projektaufnahme',
     description: 'Projektinfos für Solution Engineering sammeln.',

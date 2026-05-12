@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sensise ROI-Rechner</title>
+  <link rel="stylesheet" href="../../assets/css/theme.css">
+  <link rel="stylesheet" href="app.css">
+</head>
+<body>
+  <div class="container app-shell">
+    <div class="app-topbar">
+      <a class="btn btn-secondary" href="../../index.html">Zurück zur Startseite</a>
+      <div class="brand-lockup">
+        <img class="brand-logo" src="../../assets/img/sensise-logo-neg.png" alt="Sensise Logo">
+      </div>
+    </div>
+
+    <header class="hero panel">
+      <div>
+        <span class="eyebrow">ROI-Rechner</span>
+        <h1>Return-on-Investment berechnen</h1>
+      </div>
+      <div class="hero-metrics">
+        <article>
+          <span>Amortisation</span>
+          <strong id="payback-years">-</strong>
+        </article>
+        <article>
+          <span>ROI nach 10 Jahren</span>
+          <strong id="roi-10">0 %</strong>
+        </article>
+        <article>
+          <span>Einsparung p.a.</span>
+          <strong id="saving-year">0,00 €</strong>
+        </article>
+      </div>
+    </header>
+
+    <main class="workspace">
+      <section class="panel">
+        <div class="section-head">
+          <div>
+            <h2>Kunde & Gebäude</h2>
+            <p>Basisdaten, Verbrauch und Sensise-Annahmen aus dem Excel-ROI-Master.</p>
+          </div>
+        </div>
+        <div class="form-grid">
+          <label>
+            <span>Name / Unternehmen</span>
+            <input id="customer-name" placeholder="Kunde">
+          </label>
+          <label>
+            <span>Projektname</span>
+            <input id="project-name" placeholder="Projekt">
+          </label>
+          <label>
+            <span>Gebäudeart</span>
+            <select id="building-type"></select>
+          </label>
+          <label>
+            <span>Baujahr / Sanierungsstand</span>
+            <input id="building-state" placeholder="z. B. Bestand, 1995, teilsaniert">
+          </label>
+          <label>
+            <span>Nutzfläche ca. m²</span>
+            <input id="area" type="number" min="0" step="1" value="0">
+          </label>
+          <label>
+            <span>Energieträger</span>
+            <select id="energy-carrier"></select>
+          </label>
+          <label>
+            <span>Energieverbrauch p.a. kWh</span>
+            <input id="energy-consumption" type="number" min="0" step="100" value="0">
+          </label>
+          <label>
+            <span>Aktueller Energiepreis €/kWh</span>
+            <input id="energy-price" type="number" min="0" step="0.01" value="0">
+          </label>
+        </div>
+      </section>
+
+      <div class="main-grid">
+        <section class="panel">
+          <div class="section-head">
+            <div>
+              <h2>Investition</h2>
+              <p>Netto-Kosten aus Angebot oder Projektkalkulator eintragen.</p>
+            </div>
+          </div>
+          <div class="form-grid compact">
+            <label>
+              <span>Geräte</span>
+              <input id="investment-devices" type="number" min="0" step="100" value="0">
+            </label>
+            <label>
+              <span>Gateways</span>
+              <input id="investment-gateways" type="number" min="0" step="100" value="0">
+            </label>
+            <label>
+              <span>Zubehör</span>
+              <input id="investment-accessories" type="number" min="0" step="100" value="0">
+            </label>
+            <label>
+              <span>Software p.a.</span>
+              <input id="investment-software" type="number" min="0" step="100" value="0">
+            </label>
+            <label>
+              <span>Dienstleistungen</span>
+              <input id="investment-services" type="number" min="0" step="100" value="0">
+            </label>
+          </div>
+        </section>
+
+        <section class="panel">
+          <div class="section-head">
+            <div>
+              <h2>Ergebnis</h2>
+              <p>Berechnung ohne Preissteigerungen, wie im Excel-Hinweis.</p>
+            </div>
+          </div>
+          <div class="summary-grid">
+            <article class="stat-card">
+              <span>Energiekosten p.a.</span>
+              <strong id="energy-cost">0,00 €</strong>
+            </article>
+            <article class="stat-card">
+              <span>Abzgl. Warmwasser</span>
+              <strong id="warm-water-share">0 %</strong>
+            </article>
+            <article class="stat-card">
+              <span>Heizkosten p.a.</span>
+              <strong id="heating-cost">0,00 €</strong>
+            </article>
+            <article class="stat-card">
+              <span>kWh / m² p.a.</span>
+              <strong id="kwh-per-sqm">0</strong>
+            </article>
+            <article class="stat-card">
+              <span>Effizienzklasse</span>
+              <strong id="efficiency-class">-</strong>
+            </article>
+            <article class="stat-card">
+              <span>Annahme Einsparung</span>
+              <strong id="saving-rate">0 %</strong>
+            </article>
+            <article class="stat-card">
+              <span>Investition gesamt</span>
+              <strong id="investment-total">0,00 €</strong>
+            </article>
+            <article class="stat-card">
+              <span>Gewinn nach 5 Jahren</span>
+              <strong id="profit-5">0,00 €</strong>
+            </article>
+            <article class="stat-card">
+              <span>CO₂ nach 10 Jahren</span>
+              <strong id="co2-10">0 t</strong>
+            </article>
+          </div>
+        </section>
+      </div>
+
+      <section class="panel">
+        <div class="section-head">
+          <div>
+            <h2>Jahresverlauf</h2>
+            <p>Gewinn, kumulierter Gewinn und ROI über 10 Jahre.</p>
+          </div>
+          <div class="action-row">
+            <button class="btn btn-secondary" id="csv-btn" type="button">CSV Export</button>
+            <button class="btn btn-primary" id="print-btn" type="button">PDF herunterladen</button>
+          </div>
+        </div>
+        <div class="chart-card">
+          <div class="chart-legend-row">
+            <span><i class="legend-dot profit"></i>Gewinn kumuliert</span>
+            <span><i class="legend-dot roi"></i>ROI</span>
+          </div>
+          <svg id="roi-chart" viewBox="0 0 900 280" role="img" aria-label="Jahresverlauf Gewinn und ROI"></svg>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Jahr</th>
+                <th class="num">Einmalkosten</th>
+                <th class="num">Laufende Kosten</th>
+                <th class="num">Einsparung</th>
+                <th class="num">Gewinn/Jahr</th>
+                <th class="num">Kumuliert</th>
+                <th class="num">ROI</th>
+              </tr>
+            </thead>
+            <tbody id="year-table"></tbody>
+          </table>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <script src="app.js?v=5"></script>
+</body>
+</html>
