@@ -83,6 +83,12 @@ function isAuthenticated(req) {
   return Boolean(token && sessions.has(token));
 }
 
+function isPublicAsset(pathname) {
+  return pathname.startsWith('/assets/css/')
+    || pathname.startsWith('/assets/img/')
+    || pathname === '/favicon.ico';
+}
+
 function isHttpsRequest(req) {
   return req.socket.encrypted || String(req.headers['x-forwarded-proto'] || '').includes('https');
 }
@@ -124,64 +130,76 @@ function serveLoginPage(req, res) {
   <style>
     body {
       min-height: 100vh;
-      display: grid;
-      place-items: center;
-      padding: 28px;
-      background: var(--color-bg);
+      margin: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 32px;
+      background:
+        radial-gradient(circle at 50% 0%, rgba(243, 145, 0, 0.14), transparent 32%),
+        linear-gradient(180deg, #001533 0%, #06234b 100%);
       color: var(--color-text);
     }
 
     .login-shell {
-      width: min(430px, 100%);
+      width: min(460px, 100%);
       display: grid;
-      gap: 28px;
+      justify-items: center;
+      gap: 34px;
     }
 
     .login-logo {
-      width: min(340px, 74vw);
+      width: min(360px, 78vw);
       height: auto;
     }
 
     .login-panel {
+      width: 100%;
       display: grid;
-      gap: 18px;
-      padding: 28px;
+      gap: 24px;
+      padding: 32px;
       border: 1px solid var(--color-border);
       border-radius: var(--radius-lg);
-      background: rgba(255, 255, 255, 0.055);
+      background: rgba(255, 255, 255, 0.065);
       box-shadow: var(--shadow-soft);
+      backdrop-filter: blur(10px);
     }
 
     .login-panel h1 {
       margin: 0;
-      font-size: 28px;
+      font-size: 30px;
+      line-height: 1.1;
       letter-spacing: 0;
     }
 
     .login-panel p {
+      max-width: 34ch;
       margin: 0;
+      margin-top: 8px;
       color: var(--color-text-muted);
       line-height: 1.5;
     }
 
     .login-form {
       display: grid;
-      gap: 12px;
+      gap: 14px;
     }
 
     .login-form label {
       font-size: 13px;
       font-weight: 800;
       color: var(--color-text-muted);
+      letter-spacing: 0.03em;
+      text-transform: uppercase;
     }
 
     .login-form input {
       width: 100%;
-      min-height: 48px;
-      padding: 0 14px;
+      min-height: 52px;
+      padding: 0 16px;
       border: 1px solid var(--color-border);
-      border-radius: 8px;
-      background: rgba(0, 0, 0, 0.18);
+      border-radius: 10px;
+      background: rgba(0, 0, 0, 0.2);
       color: var(--color-text);
       font: inherit;
       outline: none;
@@ -193,14 +211,20 @@ function serveLoginPage(req, res) {
     }
 
     .login-form button {
-      min-height: 48px;
+      min-height: 52px;
       border: 0;
-      border-radius: 8px;
+      border-radius: 10px;
       background: var(--color-mustard);
-      color: #111;
+      color: var(--color-dark-blue);
       font: inherit;
       font-weight: 900;
       cursor: pointer;
+      transition: 160ms ease;
+    }
+
+    .login-form button:hover {
+      background: #d98000;
+      transform: translateY(-1px);
     }
 
     .login-error {
@@ -208,6 +232,21 @@ function serveLoginPage(req, res) {
       color: #ffb3a8;
       font-size: 14px;
       font-weight: 700;
+    }
+
+    @media (max-width: 560px) {
+      body {
+        align-items: flex-start;
+        padding: 28px 18px;
+      }
+
+      .login-shell {
+        gap: 26px;
+      }
+
+      .login-panel {
+        padding: 24px;
+      }
     }
   </style>
 </head>
@@ -482,7 +521,7 @@ http.createServer((req, res) => {
     return;
   }
 
-  if (!isAuthenticated(req)) {
+  if (!isPublicAsset(url.pathname) && !isAuthenticated(req)) {
     if (url.pathname.startsWith('/api/')) {
       send(res, 401, JSON.stringify({ error: 'Authentication required' }), 'application/json; charset=utf-8');
       return;
