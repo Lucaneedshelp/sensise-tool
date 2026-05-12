@@ -69,6 +69,102 @@ Downlink-Konfiguration besteht ebenfalls aus Identifier und Datenwert. Wenn eine
 
 Antwortregel: Bei Thermokon Standardgeraeten kann der Bot erklaeren, dass z. B. das Heartbeatintervall ueber `0xC106` und das Uplink-/Messintervall ueber `0xC108` konfiguriert wird. Eine konkrete Hex-Payload fuer `0xC108` soll er nur bilden, wenn fuer das konkrete Geraet klar ist, ob Sekunden oder Minuten genutzt werden und wie die Plattform den Identifier/Datenwert erwartet.
 
+### Thermokon Standardgeraete: gemeinsame Downlink-Regeln
+
+Die folgenden Geraete/Familien sind in der Thermokon LoRaWAN Schnittstellenbeschreibung enthalten und koennen fuer allgemeine Thermokon-Konfigurationsparameter nach demselben Schema beantwortet werden:
+
+- AF25+ LRW
+- AGS55+ LRW
+- AKF10+ LRW
+- DPA(x)+ LRW / DPA2500+ LRW
+- FTA54+ LRW
+- FTK+ LRW
+- LA+ LRW
+- Li65+ LRW
+- LK+ LRW
+- LS02+ LRW
+- MCS(x) LRW / MCS Temp_rH / MCS Lum / MCS Occ / MCS State
+- MWF+ LRW
+- NOVOS 3 LRW / NOVOS 3 EPD / NOVOS 3 INC
+- OF14+ LRW
+- TF25+ LRW
+- WK02+ LRW
+- WSA LRW
+
+Fuer allgemeine Thermokon-Konfigurationsparameter wie Hysterese Sendeverhalten, Heartbeatintervall, Port, ADR, Datenrate und Re-Join darf der Bot die Thermokon-Parameter aus der Tabelle verwenden. Der Bot soll also nicht sagen, dass die Information fehlt, nur weil der Nutzer ein konkretes Geraet wie MCS, FTA54 oder AGS55 nennt, solange es in dieser Liste/Familie enthalten ist.
+
+Wichtiger Hinweis zur Byte-Codierung: Die Schnittstellenbeschreibung beschreibt den Aufbau als Identifier plus Datenwert. Fuer UINT16-Werte soll der Bot den Wert als 2-Byte-Hexwert in Big-Endian darstellen, aber er soll dazusagen, dass die finale Eingabe vom verwendeten LNS/Codec bzw. der Plattform abhaengen kann.
+
+#### Thermokon Hysterese Sendeverhalten
+
+Parameter:
+
+- Identifier: `0xC107`
+- Datentyp: `UINT16`
+- Bedeutung: Hysterese Sendeverhalten
+- Werte:
+  - `0` = keine Hysterese
+  - `1` = grosse Hysterese
+  - `2` = mittlere Hysterese
+  - `3` = kleine Hysterese
+
+Beispielpayloads, wenn der LNS/Codec Identifier + UINT16 Big-Endian erwartet:
+
+| Ziel | Wert | Payload |
+|---|---:|---|
+| Hysterese deaktivieren | `0` | `C1070000` |
+| grosse Hysterese aktivieren | `1` | `C1070001` |
+| mittlere Hysterese aktivieren | `2` | `C1070002` |
+| kleine Hysterese aktivieren | `3` | `C1070003` |
+
+Antwortregel fuer Nutzerfragen wie "Wie aktiviere ich bei [Thermokon-Geraet] die Hysterese?":
+
+Der Bot soll antworten: "Bei Thermokon LRW-Geraeten aus der Schnittstellenbeschreibung wird das Sendeverhalten ueber den Parameter `0xC107` konfiguriert. `0` bedeutet keine Hysterese, `1` grosse, `2` mittlere, `3` kleine Hysterese. Wenn dein LNS/Codec Identifier + UINT16 Big-Endian erwartet, waere z. B. fuer mittlere Hysterese die Payload `C1070002`. Bitte pruefe den Downlink-Port bzw. die Codec-Eingabe in deiner Plattform."
+
+Wenn der Nutzer nur "aktivieren" sagt, soll der Bot nachfragen, ob grosse, mittlere oder kleine Hysterese gewuenscht ist. Er darf als typischen Vorschlag "mittlere Hysterese" nennen, aber nicht behaupten, dass dies immer richtig ist.
+
+#### Thermokon Heartbeatintervall
+
+Parameter:
+
+- Identifier: `0xC106`
+- Datentyp: `UINT16`
+- Bedeutung: Heartbeatintervall
+- Einheit: Minuten
+- Default: 1440 Minuten
+
+Beispielpayloads, wenn Identifier + UINT16 Big-Endian erwartet wird:
+
+| Ziel | Wert | Payload |
+|---|---:|---|
+| 60 Minuten | `60` / `0x003C` | `C106003C` |
+| 12 Stunden | `720` / `0x02D0` | `C10602D0` |
+| 24 Stunden | `1440` / `0x05A0` | `C10605A0` |
+
+#### Thermokon Messintervall / Uplink-Intervall
+
+Parameter:
+
+- Identifier: `0xC108`
+- Datentyp: `UINT16`
+- Bedeutung: Messintervall / Uplink-Intervall
+- Einheit: Sekunden oder Minuten, abhaengig vom Geraetetyp bzw. Softwarebeschreibung
+- Default: 60/5, geraeteabhaengig
+
+Antwortregel: Der Bot darf `0xC108` als richtigen Parameter nennen, soll aber bei konkreten Minuten-/Sekundenwerten nach dem Geraet bzw. der Softwarebeschreibung fragen, wenn die Einheit nicht eindeutig ist. Er darf keine konkrete `C108....` Payload behaupten, wenn unklar ist, ob Sekunden oder Minuten gelten.
+
+#### Thermokon Port / ADR / Re-Join
+
+| Ziel | Identifier | Werte / Hinweis |
+|---|---|---|
+| Uplink-/Downlink-Port | `0xC216` | UINT16, gueltige Ports 1-223, Default 2 |
+| ADR | `0xC217` | `0` deaktiviert, `1` aktiviert |
+| Datenrate DR | `0xC218` | `0` DR0/SF12 bis `5` DR5/SF7 |
+| Re-Join Intervall | `0xC21C` | Minuten, `0` deaktiviert, `0x05A0` = 1440 min |
+| Confirmation Activation fuer Heartbeat | `0xC21D` | `0` deaktiviert, `1` aktiviert |
+
+Antwortregel: Bei diesen Standardparametern soll der Bot die Identifier und Werte nennen und bei konkreter Payload die UINT16-Big-Endian-Variante als Beispiel formulieren, mit Hinweis auf LNS/Codec-Pruefung.
+
 ## SAB07 LRW Downlinks
 
 Quelle: SAB07_LRW_Manual_en, Issue date 29.09.2023.

@@ -95,6 +95,15 @@ const state = {
 const euro = new Intl.NumberFormat('de-DE', { style: 'currency', currency: 'EUR' });
 const amount = new Intl.NumberFormat('de-DE', { maximumFractionDigits: 1 });
 
+const DISCOUNT_GROUPS = {
+  software: { label: 'Software', max: 5 },
+  w1: { label: 'W1', max: 35 },
+  w2: { label: 'W2', max: 55 },
+  sim: { label: 'SIM Karte', max: 5 },
+  training: { label: 'Schulung', max: 5 },
+  batteries: { label: 'Batterien', max: 5 }
+};
+
 const els = {
   catalogCount: document.getElementById('catalog-count'),
   lineCount: document.getElementById('line-count'),
@@ -118,6 +127,37 @@ function isRecurring(product) {
   return product.unit.toLowerCase().includes('monat');
 }
 
+function getAutoDiscountGroup(product) {
+  const text = `${product.category} ${product.sku} ${product.name}`.toLowerCase();
+  if (product.category === 'Software') return 'software';
+  if (text.includes('sim-karte') || text.includes('sim karte')) return 'sim';
+  if (text.includes('schulung')) return 'training';
+  if (text.includes('batterie')) return 'batteries';
+  return '';
+}
+
+function getAllowedDiscountGroups(product) {
+  const autoGroup = getAutoDiscountGroup(product);
+  if (autoGroup) return [autoGroup];
+  if (['Endgerät', 'Gateway', 'Zubehör'].includes(product.category)) return ['w1', 'w2'];
+  return [];
+}
+
+function getLineDiscountGroup(product, line) {
+  const allowedGroups = getAllowedDiscountGroups(product);
+  const group = line.discountGroup || getAutoDiscountGroup(product);
+  return allowedGroups.includes(group) ? group : '';
+}
+
+function getMaxDiscount(product, line) {
+  const group = DISCOUNT_GROUPS[getLineDiscountGroup(product, line)];
+  return group ? group.max : 100;
+}
+
+function clampDiscount(product, line, value) {
+  return Math.min(Math.max(Number(value) || 0, 0), getMaxDiscount(product, line));
+}
+
 function saveCart() {
   localStorage.setItem('sensise-project-calculator-cart', JSON.stringify(state.cart));
 }
@@ -128,7 +168,7 @@ function getDisplayTotal(value) {
 
 function getLineTotal(product, line) {
   const months = isRecurring(product) ? Math.max(Number(line.months) || 1, 1) : 1;
-  const discount = Math.min(Math.max(Number(line.discount) || 0, 0), 100);
+  const discount = clampDiscount(product, line, line.discount);
   return product.price * (Number(line.qty) || 0) * months * (1 - discount / 100);
 }
 
@@ -169,19 +209,34 @@ function renderCart() {
   els.cartBody.innerHTML = state.cart.map(line => {
     const product = getProduct(line.productId);
     if (!product) return '';
+    const groupId = getLineDiscountGroup(product, line);
+    const group = DISCOUNT_GROUPS[groupId];
+    const allowedGroups = getAllowedDiscountGroups(product);
+    const maxDiscount = getMaxDiscount(product, line);
+    const discount = clampDiscount(product, line, line.discount);
+    line.discount = discount;
     return `
       <tr>
         <td>
           <span class="article-title">${escapeHtml(product.name)}</span>
           <span class="article-meta">${escapeHtml(product.sku)} · ${euro.format(product.price)} / ${escapeHtml(product.unit)}</span>
+          ${allowedGroups.length ? `<span class="discount-group-label">${group ? `${escapeHtml(group.label)} max. ${group.max}%` : 'Rabattgruppe wählen'}</span>` : ''}
         </td>
         <td class="num"><input class="cart-input" type="number" min="0" step="1" value="${line.qty}" data-field="qty" data-line="${line.id}"></td>
         <td class="num"><input class="cart-input" type="number" min="1" step="1" value="${line.months}" data-field="months" data-line="${line.id}" ${isRecurring(product) ? '' : 'disabled'}></td>
         <td class="num">
           <label class="discount-field" title="Rabatt für diese Position">
-            <input class="cart-input" type="number" min="0" max="100" step="0.5" value="${line.discount}" data-field="discount" data-line="${line.id}">
+            <input class="cart-input" type="number" min="0" max="${maxDiscount}" step="0.5" value="${discount}" data-field="discount" data-line="${line.id}">
             <span>%</span>
           </label>
+          ${allowedGroups.length ? `<div class="discount-chips">
+            ${allowedGroups.map(id => {
+              const item = DISCOUNT_GROUPS[id];
+              return `
+              <button class="discount-chip ${groupId === id && discount > 0 ? 'active' : ''}" type="button" data-discount-group="${id}" data-line="${line.id}" title="${escapeHtml(item.label)} max. ${item.max}%">${escapeHtml(item.label)}</button>
+            `;
+            }).join('')}
+          </div>` : ''}
         </td>
         <td class="num"><strong>${getDisplayTotal(getLineTotal(product, line))}</strong></td>
         <td class="num"><button class="icon-btn remove-btn" data-remove="${line.id}" title="Entfernen">x</button></td>
@@ -223,9 +278,28 @@ function addProduct(productId, qty = 1, months) {
       productId,
       qty,
       months: months || (isRecurring(product) ? 12 : 1),
-      discount: 0
+      discount: 0,
+      discountGroup: getAutoDiscountGroup(product)
     });
   }
+  saveCart();
+  renderCart();
+}
+
+function applyDiscountGroup(lineId, groupId) {
+  const line = state.cart.find(item => item.id === lineId);
+  if (!line) return;
+  const product = getProduct(line.productId);
+  if (!product || !getAllowedDiscountGroups(product).includes(groupId)) return;
+  if (getLineDiscountGroup(product, line) === groupId) {
+    line.discountGroup = '';
+    line.discount = 0;
+    saveCart();
+    renderCart();
+    return;
+  }
+  line.discountGroup = groupId;
+  line.discount = DISCOUNT_GROUPS[groupId].max;
   saveCart();
   renderCart();
 }
@@ -242,7 +316,7 @@ function exportCsv() {
     ['Projekt', els.projectName.value],
     ['Kunde', els.customerName.value],
     [],
-    ['Artikelgruppe', 'Kurzbezeichnung', 'Bezeichnung', 'Einheit', 'Einzelpreis', 'Menge', 'Monate', 'Rabatt %', 'Summe netto']
+    ['Artikelgruppe', 'Kurzbezeichnung', 'Bezeichnung', 'Einheit', 'Einzelpreis', 'Menge', 'Monate', 'Rabattgruppe', 'Rabatt %', 'Summe netto']
   ];
 
   state.cart.forEach(line => {
@@ -256,6 +330,7 @@ function exportCsv() {
       product.price.toFixed(2),
       line.qty,
       isRecurring(product) ? line.months : '',
+      DISCOUNT_GROUPS[getLineDiscountGroup(product, line)]?.label || '',
       line.discount,
       getLineTotal(product, line).toFixed(2)
     ]);
@@ -308,11 +383,21 @@ function init() {
     if (!input) return;
     const line = state.cart.find(item => item.id === input.dataset.line);
     if (!line) return;
-    line[input.dataset.field] = Number(input.value) || 0;
+    const product = getProduct(line.productId);
+    if (input.dataset.field === 'discount') {
+      line.discount = clampDiscount(product, line, input.value);
+    } else {
+      line[input.dataset.field] = Number(input.value) || 0;
+    }
     saveCart();
     renderCart();
   });
   els.cartBody.addEventListener('click', event => {
+    const groupButton = event.target.closest('[data-discount-group]');
+    if (groupButton) {
+      applyDiscountGroup(groupButton.dataset.line, groupButton.dataset.discountGroup);
+      return;
+    }
     const button = event.target.closest('[data-remove]');
     if (!button) return;
     state.cart = state.cart.filter(line => line.id !== button.dataset.remove);

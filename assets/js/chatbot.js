@@ -83,7 +83,16 @@ function createChatbot() {
           messages: chatbotState.messages.slice(-10)
         })
       });
-      const data = await response.json();
+      const responseText = await response.text();
+      if (!responseText.trim()) {
+        throw new Error(`Leere Antwort vom Chat-Server (HTTP ${response.status})`);
+      }
+      let data;
+      try {
+        data = JSON.parse(responseText);
+      } catch {
+        throw new Error(`Ungueltige Antwort vom Chat-Server (HTTP ${response.status})`);
+      }
       if (!response.ok) throw new Error(data.error || `HTTP ${response.status}`);
       chatbotState.messages.push({ role: 'assistant', content: data.reply });
     } catch (error) {
