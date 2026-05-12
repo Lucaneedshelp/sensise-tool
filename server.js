@@ -156,7 +156,7 @@ function serveLoginPage(req, res) {
     .login-panel {
       width: 100%;
       display: grid;
-      gap: 24px;
+      gap: 18px;
       padding: 32px;
       border: 1px solid var(--color-border);
       border-radius: var(--radius-lg);
@@ -170,14 +170,6 @@ function serveLoginPage(req, res) {
       font-size: 30px;
       line-height: 1.1;
       letter-spacing: 0;
-    }
-
-    .login-panel p {
-      max-width: 34ch;
-      margin: 0;
-      margin-top: 8px;
-      color: var(--color-text-muted);
-      line-height: 1.5;
     }
 
     .login-form {
@@ -215,7 +207,7 @@ function serveLoginPage(req, res) {
       border: 0;
       border-radius: 10px;
       background: var(--color-mustard);
-      color: var(--color-dark-blue);
+      color: var(--color-white);
       font: inherit;
       font-weight: 900;
       cursor: pointer;
@@ -254,10 +246,7 @@ function serveLoginPage(req, res) {
   <main class="login-shell">
     <img class="login-logo" src="/assets/img/sensise-logo-neg.png" alt="Sensise Logo">
     <section class="login-panel">
-      <div>
-        <h1>Sensise Tools</h1>
-        <p>Bitte gib das Passwort ein, um die internen Tools zu öffnen.</p>
-      </div>
+      <h1>Login</h1>
       <form class="login-form" id="login-form">
         <label for="password">Passwort</label>
         <input id="password" name="password" type="password" autocomplete="current-password" autofocus>
