@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Sensise Projektaufnahme</title>
   <link rel="stylesheet" href="../../assets/css/theme.css">
-  <link rel="stylesheet" href="app.css">
+  <link rel="stylesheet" href="app.css?v=4">
 </head>
 <body>
   <div class="container app-shell">
@@ -209,6 +209,10 @@
                   <span>Dienstleistungen</span>
                   <strong id="service-total">0,00 €</strong>
                 </article>
+                <article class="stat-card total-card">
+                  <span>Summe netto</span>
+                  <strong id="grand-total">0,00 €</strong>
+                </article>
               </div>
             </aside>
           </div>
@@ -232,14 +236,14 @@
         <section class="panel intake-panel">
           <div class="section-head">
             <div>
-              <h2>Power Automate</h2>
-              <p>HTTP-Trigger-URL eintragen, testen und später in SharePoint verarbeiten.</p>
+              <h2>Übergabe</h2>
+              <p>Projektaufnahme final an Solution Engineering übergeben.</p>
             </div>
           </div>
 
           <div class="form-grid">
             <label>
-              <span>Flow HTTP POST URL</span>
+              <span>Power Automate HTTP POST URL optional</span>
               <input id="flow-url" type="url" placeholder="https://prod-xx.westeurope.logic.azure.com/...">
             </label>
             <label>
@@ -251,8 +255,7 @@
           <div class="submit-row">
             <span id="submit-status" role="status"></span>
             <div class="action-row">
-              <button class="btn btn-secondary" type="button" id="json-btn">JSON exportieren</button>
-              <button class="btn btn-primary" type="submit">An Power Automate senden</button>
+              <button class="btn btn-primary" type="submit">Projektaufnahme absenden</button>
             </div>
           </div>
         </section>
@@ -260,6 +263,20 @@
     </main>
   </div>
 
-  <script src="app.js"></script>
+  <dialog class="confirm-dialog" id="submit-confirm-dialog" aria-labelledby="submit-confirm-title">
+    <form method="dialog" class="confirm-card">
+      <div class="confirm-icon">!</div>
+      <div>
+        <h2 id="submit-confirm-title">Projektaufnahme absenden?</h2>
+        <p>Bitte prüfe kurz, ob Kundendaten, Anwendungsfall, technische Anforderungen, Auswahl und Dateien vollständig sind. Danach wird die Projektaufnahme an Solution Engineering übergeben.</p>
+      </div>
+      <div class="confirm-actions">
+        <button class="btn btn-secondary" value="cancel" type="submit">Weiter bearbeiten</button>
+        <button class="btn btn-primary" value="confirm" type="submit">Ja, absenden</button>
+      </div>
+    </form>
+  </dialog>
+
+  <script src="app.js?v=4"></script>
 </body>
 </html>

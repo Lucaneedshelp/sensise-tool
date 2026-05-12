@@ -124,10 +124,12 @@ const els = {
   hardwareTotal: document.getElementById('hardware-total'),
   softwareTotal: document.getElementById('software-total'),
   serviceTotal: document.getElementById('service-total'),
+  grandTotal: document.getElementById('grand-total'),
   attachments: document.getElementById('attachments'),
   fileList: document.getElementById('file-list'),
   flowUrl: document.getElementById('flow-url'),
-  status: document.getElementById('submit-status')
+  status: document.getElementById('submit-status'),
+  submitDialog: document.getElementById('submit-confirm-dialog')
 };
 
 function isRecurring(product) {
@@ -263,6 +265,7 @@ function renderTotals() {
   els.hardwareTotal.textContent = euro.format(totals.hardware);
   els.softwareTotal.textContent = euro.format(totals.software);
   els.serviceTotal.textContent = euro.format(totals.service);
+  els.grandTotal.textContent = euro.format(totals.grand);
 }
 
 function renderFiles() {
@@ -317,7 +320,16 @@ function fileToPayload(file) {
   });
 }
 
-async function buildPayload(includeFiles = true) {
+function fileToMetadata(file) {
+  return {
+    name: file.name,
+    size: file.size,
+    sizeMb: Number((file.size / 1024 / 1024).toFixed(2)),
+    type: file.type || 'application/octet-stream'
+  };
+}
+
+async function buildPayload(includeFileContent = false) {
   const form = Object.fromEntries(new FormData(els.form).entries());
   const selectedServices = SERVICE_OPTIONS
     .filter(service => state.services.includes(service.id))
@@ -344,6 +356,7 @@ async function buildPayload(includeFiles = true) {
   }, { totalNet: 0 });
 
   return {
+    schemaVersion: 1,
     submittedAt: new Date().toISOString(),
     source: 'sensise-project-intake',
     project: form,
@@ -352,7 +365,9 @@ async function buildPayload(includeFiles = true) {
     totals,
     internalNote: document.getElementById('internal-note').value,
     suggestedFolderName: sanitizeFilename(`${form.customerName || 'Kunde'}_${form.projectName || 'Projekt'}`),
-    attachments: includeFiles ? await Promise.all(state.files.map(fileToPayload)) : []
+    attachments: includeFileContent
+      ? await Promise.all(state.files.map(fileToPayload))
+      : state.files.map(fileToMetadata)
   };
 }
 
@@ -367,9 +382,101 @@ function downloadJson(payload) {
   URL.revokeObjectURL(link.href);
 }
 
+function csvEscape(value) {
+  const text = String(value ?? '');
+  return /[;"\n\r]/.test(text) ? `"${text.replace(/"/g, '""')}"` : text;
+}
+
+function toCsv(rows) {
+  return rows.map(row => row.map(csvEscape).join(';')).join('\r\n');
+}
+
+function downloadText(filename, content, type) {
+  const blob = new Blob([content], { type });
+  const link = document.createElement('a');
+  link.href = URL.createObjectURL(blob);
+  link.download = filename;
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+  URL.revokeObjectURL(link.href);
+}
+
+async function downloadCsv() {
+  const payload = await buildPayload(false);
+  const projectRows = [
+    ['Bereich', 'Feld', 'Wert'],
+    ...Object.entries(payload.project).map(([key, value]) => ['Projekt', key, value]),
+    ['Projekt', 'internalNote', payload.internalNote],
+    ['Projekt', 'suggestedFolderName', payload.suggestedFolderName],
+    ['Summen', 'totalNet', payload.totals.totalNet.toFixed(2)]
+  ];
+  const serviceRows = [
+    [],
+    ['Services'],
+    ['ID', 'Titel', 'Beschreibung'],
+    ...payload.selectedServices.map(service => [service.id, service.title, service.description])
+  ];
+  const positionRows = [
+    [],
+    ['Positionen'],
+    ['Kategorie', 'Artikel', 'Bezeichnung', 'Hersteller', 'Einheit', 'Einzelpreis netto', 'Menge', 'Monate', 'Rabatt %', 'Summe netto'],
+    ...payload.positions.map(item => [
+      item.category,
+      item.sku,
+      item.name,
+      item.manufacturer,
+      item.unit,
+      item.unitPrice.toFixed(2),
+      item.quantity,
+      item.months ?? '',
+      item.discountPercent,
+      item.totalNet.toFixed(2)
+    ])
+  ];
+  const fileRows = [
+    [],
+    ['Dateien'],
+    ['Name', 'Groesse MB', 'Typ'],
+    ...payload.attachments.map(file => [file.name, file.sizeMb, file.type])
+  ];
+
+  downloadText(`${payload.suggestedFolderName}.csv`, toCsv([...projectRows, ...serviceRows, ...positionRows, ...fileRows]), 'text/csv;charset=utf-8');
+  setStatus('CSV wurde exportiert.', 'ok');
+}
+
+async function copyJsonToClipboard() {
+  const payload = await buildPayload(false);
+  await navigator.clipboard.writeText(JSON.stringify(payload, null, 2));
+  setStatus('JSON wurde in die Zwischenablage kopiert.', 'ok');
+}
+
+function requestSubmitConfirmation() {
+  return new Promise(resolve => {
+    const dialog = els.submitDialog;
+    if (!dialog || typeof dialog.showModal !== 'function') {
+      resolve(window.confirm('Hast du alle relevanten Informationen eingetragen und bist sicher, dass die Projektaufnahme jetzt an Solution Engineering übergeben werden soll?'));
+      return;
+    }
+
+    const handleClose = () => {
+      dialog.removeEventListener('close', handleClose);
+      resolve(dialog.returnValue === 'confirm');
+    };
+
+    dialog.addEventListener('close', handleClose);
+    dialog.showModal();
+  });
+}
+
 async function submitToFlow(event) {
   event.preventDefault();
   if (!els.form.reportValidity()) return;
+  const confirmed = await requestSubmitConfirmation();
+  if (!confirmed) {
+    setStatus('Absenden abgebrochen. Du kannst die Angaben weiter bearbeiten.');
+    return;
+  }
   if (!els.flowUrl.value.trim()) {
     setStatus('Bitte zuerst die Power-Automate-HTTP-URL eintragen.', 'error');
     return;
@@ -399,6 +506,7 @@ function bindEvents() {
     if (!input) return;
     state.services = [...els.serviceOptions.querySelectorAll('input:checked')].map(item => item.value);
     renderTotals();
+    saveDraft();
   });
   els.search.addEventListener('input', event => {
     state.search = event.target.value;
@@ -434,9 +542,39 @@ function bindEvents() {
       renderCart();
     }
   });
-  document.getElementById('json-btn').addEventListener('click', async () => {
-    downloadJson(await buildPayload(true));
-  });
+  const jsonButton = document.getElementById('json-btn');
+  if (jsonButton) {
+    jsonButton.addEventListener('click', async () => {
+      downloadJson(await buildPayload(false));
+      setStatus('JSON wurde exportiert.', 'ok');
+    });
+  }
+  const csvButton = document.getElementById('csv-btn');
+  if (csvButton) csvButton.addEventListener('click', downloadCsv);
+  const copyJsonButton = document.getElementById('copy-json-btn');
+  if (copyJsonButton) {
+    copyJsonButton.addEventListener('click', () => {
+      copyJsonToClipboard().catch(error => setStatus(`Kopieren fehlgeschlagen: ${error.message}`, 'error'));
+    });
+  }
+  const printButton = document.getElementById('print-btn');
+  if (printButton) printButton.addEventListener('click', () => window.print());
+  const resetDraftButton = document.getElementById('reset-draft-btn');
+  if (resetDraftButton) {
+    resetDraftButton.addEventListener('click', () => {
+      if (!confirm('Entwurf und aktuelle Auswahl wirklich löschen?')) return;
+      localStorage.removeItem(STORAGE_KEY);
+      els.form.reset();
+      state.cart = [];
+      state.services = [];
+      state.files = [];
+      renderServices();
+      renderCart();
+      renderFiles();
+      localStorage.removeItem(STORAGE_KEY);
+      setStatus('Entwurf wurde gelöscht.', 'ok');
+    });
+  }
   els.form.addEventListener('submit', submitToFlow);
 }
 

@@ -352,6 +352,21 @@ tr:hover td {
   border-color: rgba(243, 145, 0, 0.24);
 }
 
+.summary-grid .total-card {
+  background: rgba(243, 145, 0, 0.18);
+  border-color: rgba(243, 145, 0, 0.44);
+}
+
+.danger-btn {
+  border-color: rgba(255, 177, 168, 0.4);
+  color: #ffb1a8;
+}
+
+.danger-btn:hover {
+  background: rgba(255, 177, 168, 0.14);
+  color: #ffd8d4;
+}
+
 .action-row,
 .submit-row {
   display: flex;
@@ -411,6 +426,62 @@ tr:hover td {
   color: #ffb1a8;
 }
 
+.confirm-dialog {
+  width: min(520px, calc(100vw - 32px));
+  padding: 0;
+  border: 1px solid rgba(231, 233, 236, 0.18);
+  border-radius: 14px;
+  background: #071a36;
+  color: var(--color-text);
+  box-shadow: 0 26px 72px rgba(0, 0, 0, 0.46);
+}
+
+.confirm-dialog::backdrop {
+  background: rgba(0, 9, 23, 0.72);
+  backdrop-filter: blur(3px);
+}
+
+.confirm-card {
+  display: grid;
+  grid-template-columns: 44px 1fr;
+  gap: 16px;
+  padding: 22px;
+}
+
+.confirm-icon {
+  width: 44px;
+  height: 44px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid rgba(243, 145, 0, 0.45);
+  border-radius: 12px;
+  background: rgba(243, 145, 0, 0.14);
+  color: var(--color-mustard);
+  font-weight: 900;
+}
+
+.confirm-card h2 {
+  margin: 0 0 8px;
+  color: var(--color-pale-grey);
+  font-size: 22px;
+}
+
+.confirm-card p {
+  margin: 0;
+  color: var(--color-text-muted);
+  line-height: 1.55;
+}
+
+.confirm-actions {
+  grid-column: 1 / -1;
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-top: 4px;
+}
+
 @media (max-width: 1080px) {
   .project-grid,
   .selector-layout {
@@ -456,6 +527,7 @@ tr:hover td {
   .app-topbar .btn,
   .catalog-tools,
   .action-row,
+  .danger-btn,
   .file-drop,
   #flow-url,
   .submit-row {
