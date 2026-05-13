@@ -84,6 +84,9 @@ function createChatbot() {
         })
       });
       const responseText = await response.text();
+      if (response.status === 401) {
+        throw new Error('SESSION_EXPIRED');
+      }
       if (!responseText.trim()) {
         throw new Error(`Leere Antwort vom Chat-Server (HTTP ${response.status})`);
       }
@@ -96,9 +99,12 @@ function createChatbot() {
       if (!response.ok) throw new Error(data.error || `HTTP ${response.status}`);
       chatbotState.messages.push({ role: 'assistant', content: data.reply });
     } catch (error) {
+      const message = error.message === 'SESSION_EXPIRED'
+        ? 'Deine Sitzung ist abgelaufen oder der Server wurde neu gestartet. Bitte melde dich kurz neu an und stelle die Frage danach nochmal.'
+        : `Ich konnte den Chat-Server nicht erreichen. Starte die Seite über den lokalen Server und prüfe die API-Key-Konfiguration in der .env. (${error.message})`;
       chatbotState.messages.push({
         role: 'assistant',
-        content: `Ich konnte den Chat-Server nicht erreichen. Starte die Seite über den lokalen Server und prüfe die API-Key-Konfiguration in der .env. (${error.message})`
+        content: message
       });
     } finally {
       chatbotState.busy = false;

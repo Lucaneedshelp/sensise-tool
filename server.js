@@ -3,6 +3,7 @@ const https = require('https');
 const fs = require('fs');
 const path = require('path');
 const crypto = require('crypto');
+const { createChatReply } = require('./services/chatbot');
 
 loadEnv(path.join(__dirname, '.env'));
 
@@ -322,167 +323,11 @@ async function handleChat(req, res) {
   try {
     const body = JSON.parse(await readBody(req) || '{}');
     const messages = Array.isArray(body.messages) ? body.messages : [];
-    const lastUserMessage = [...messages].reverse().find(message => message.role === 'user')?.content || '';
-
-    if (!process.env.OPENAI_API_KEY && !process.env.OPENROUTER_API_KEY) {
-      send(res, 200, JSON.stringify({
-        reply: `Demo-Modus: Ich habe deine Frage erhalten: "${lastUserMessage}".\n\nSobald OPENAI_API_KEY in der .env gesetzt ist, antworte ich mit OpenAI.`
-      }), 'application/json; charset=utf-8');
-      return;
-    }
-
-    const searchContext = await searchKnowledge(lastUserMessage);
-    const reply = process.env.OPENROUTER_API_KEY
-      ? await callOpenRouter(messages, searchContext)
-      : await callOpenAI(messages, searchContext);
+    const reply = await createChatReply(messages);
     send(res, 200, JSON.stringify({ reply }), 'application/json; charset=utf-8');
   } catch (error) {
     send(res, 500, JSON.stringify({ error: error.message }), 'application/json; charset=utf-8');
   }
-}
-
-async function searchKnowledge(query) {
-  const endpoint = String(process.env.AZURE_SEARCH_ENDPOINT || '').trim().replace(/\/+$/, '');
-  const indexName = String(process.env.AZURE_SEARCH_INDEX || '').trim();
-  const apiKey = String(process.env.AZURE_SEARCH_API_KEY || '').trim();
-
-  if (!endpoint || !indexName || !apiKey || !query.trim()) {
-    return '';
-  }
-
-  const url = `${endpoint}/indexes/${encodeURIComponent(indexName)}/docs/search?api-version=2024-07-01`;
-  const payload = JSON.stringify({
-    search: query,
-    searchFields: 'title,content,product',
-    select: 'title,content,source,type,product',
-    top: 5
-  });
-
-  try {
-    const response = await fetch(url, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'api-key': apiKey
-      },
-      body: payload
-    });
-
-    const data = await response.json();
-    if (!response.ok) {
-      console.error('Azure AI Search error:', data.error?.message || response.status);
-      return '';
-    }
-
-    return (data.value || [])
-      .map((item, index) => [
-        `Treffer ${index + 1}: ${item.title || 'Ohne Titel'}`,
-        item.product ? `Produkt: ${item.product}` : '',
-        item.type ? `Typ: ${item.type}` : '',
-        item.source ? `Quelle: ${item.source}` : '',
-        String(item.content || '').trim()
-      ].filter(Boolean).join('\n'))
-      .join('\n\n---\n\n')
-      .slice(0, 14000);
-  } catch (error) {
-    console.error('Azure AI Search request failed:', error.message);
-    return '';
-  }
-}
-
-function getSystemPrompt(searchContext = '') {
-  const instructions = [
-    'Du bist der Sensise Produkt- und Toolassistent.',
-    'Antworte auf Deutsch, klar und hilfreich.',
-    'Du darfst allgemein zu Sensise-Produkten, Projektaufnahme, Projektkalkulator und Terminbuchung helfen.',
-    'Erfinde keine Preise, Lieferzeiten oder verbindlichen technischen Zusagen.',
-    'Wenn eine Frage intern, rechtlich, kommerziell oder sicherheitskritisch ist, weise auf Abstimmung mit dem Sensise-Team hin.',
-    'Nutze den folgenden Kontext aus Azure AI Search als bevorzugte Grundlage.',
-    'Wenn im Kontext keine passende Information steht, sage das transparent und frage nach oder verweise auf das Sensise-Team.'
-  ].join(' ');
-
-  if (!searchContext) return `${instructions}\n\nAzure-AI-Search-Kontext: Keine passenden Treffer gefunden oder Suche nicht konfiguriert.`;
-  return `${instructions}\n\nAzure-AI-Search-Kontext:\n${searchContext}`;
-}
-
-function normalizeMessages(messages) {
-  return messages.map(message => ({
-    role: message.role === 'assistant' ? 'assistant' : 'user',
-    content: String(message.content || '').slice(0, 4000)
-  }));
-}
-
-async function callOpenAI(messages, searchContext) {
-  const system = getSystemPrompt(searchContext);
-
-  const payload = JSON.stringify({
-    model: process.env.OPENAI_MODEL || 'gpt-4.1-mini',
-    input: [
-      { role: 'system', content: system },
-      ...normalizeMessages(messages)
-    ],
-    max_output_tokens: 700
-  });
-
-  const response = await fetch('https://api.openai.com/v1/responses', {
-    method: 'POST',
-    headers: {
-      'Authorization': `Bearer ${process.env.OPENAI_API_KEY}`,
-      'Content-Type': 'application/json'
-    },
-    body: payload
-  });
-
-  const data = await response.json();
-  if (!response.ok) {
-    throw new Error(data.error?.message || `OpenAI API error ${response.status}`);
-  }
-
-  return data.output_text || extractOutputText(data) || 'Ich habe keine Antwort erhalten.';
-}
-
-async function callOpenRouter(messages, searchContext) {
-  const apiKey = String(process.env.OPENROUTER_API_KEY || '').trim();
-  if (!apiKey.startsWith('sk-or-')) {
-    throw new Error('OPENROUTER_API_KEY ist gesetzt, sieht aber nicht wie ein kompletter OpenRouter-Key aus. Der Key muss mit sk-or- beginnen.');
-  }
-
-  const payload = JSON.stringify({
-    model: process.env.OPENROUTER_MODEL || 'openai/gpt-4o-mini',
-    messages: [
-      { role: 'system', content: getSystemPrompt(searchContext) },
-      ...normalizeMessages(messages)
-    ],
-    max_tokens: 700,
-    temperature: 0.4
-  });
-
-  const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
-    method: 'POST',
-    headers: {
-      'Authorization': `Bearer ${apiKey}`,
-      'Content-Type': 'application/json',
-      'HTTP-Referer': process.env.APP_PUBLIC_URL || `http://localhost:${PORT}`,
-      'X-Title': 'Sensise Tools'
-    },
-    body: payload
-  });
-
-  const data = await response.json();
-  if (!response.ok) {
-    throw new Error(data.error?.message || `OpenRouter API error ${response.status}`);
-  }
-
-  return data.choices?.[0]?.message?.content?.trim() || 'Ich habe keine Antwort erhalten.';
-}
-
-function extractOutputText(data) {
-  return (data.output || [])
-    .flatMap(item => item.content || [])
-    .filter(item => item.type === 'output_text' || item.text)
-    .map(item => item.text)
-    .join('\n')
-    .trim();
 }
 
 function fetchIcs(url, res) {
