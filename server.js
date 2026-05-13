@@ -8,7 +8,6 @@ loadEnv(path.join(__dirname, '.env'));
 
 const PORT = Number(process.env.PORT || 4177);
 const ROOT = __dirname;
-const KNOWLEDGE_DIR = path.join(ROOT, 'assets', 'knowledge');
 const DEFAULT_ICS_URL = 'https://outlook.office365.com/owa/calendar/0a43a3313a6140d3ab20331348d665f2@thermokon.de/8b53a825b48c4adc9281eb67987ab3508190174971116413725/calendar.ics';
 const SESSION_COOKIE = 'sensise_session';
 const sessions = new Set();
@@ -332,42 +331,78 @@ async function handleChat(req, res) {
       return;
     }
 
+    const searchContext = await searchKnowledge(lastUserMessage);
     const reply = process.env.OPENROUTER_API_KEY
-      ? await callOpenRouter(messages)
-      : await callOpenAI(messages);
+      ? await callOpenRouter(messages, searchContext)
+      : await callOpenAI(messages, searchContext);
     send(res, 200, JSON.stringify({ reply }), 'application/json; charset=utf-8');
   } catch (error) {
     send(res, 500, JSON.stringify({ error: error.message }), 'application/json; charset=utf-8');
   }
 }
 
-function loadKnowledge() {
+async function searchKnowledge(query) {
+  const endpoint = String(process.env.AZURE_SEARCH_ENDPOINT || '').trim().replace(/\/+$/, '');
+  const indexName = String(process.env.AZURE_SEARCH_INDEX || '').trim();
+  const apiKey = String(process.env.AZURE_SEARCH_API_KEY || '').trim();
+
+  if (!endpoint || !indexName || !apiKey || !query.trim()) {
+    return '';
+  }
+
+  const url = `${endpoint}/indexes/${encodeURIComponent(indexName)}/docs/search?api-version=2024-07-01`;
+  const payload = JSON.stringify({
+    search: query,
+    searchFields: 'title,content,product',
+    select: 'title,content,source,type,product',
+    top: 5
+  });
+
   try {
-    if (!fs.existsSync(KNOWLEDGE_DIR)) return '';
-    return fs.readdirSync(KNOWLEDGE_DIR)
-      .filter(file => file.toLowerCase().endsWith('.md'))
-      .sort()
-      .map(file => fs.readFileSync(path.join(KNOWLEDGE_DIR, file), 'utf8').trim())
+    const response = await fetch(url, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'api-key': apiKey
+      },
+      body: payload
+    });
+
+    const data = await response.json();
+    if (!response.ok) {
+      console.error('Azure AI Search error:', data.error?.message || response.status);
+      return '';
+    }
+
+    return (data.value || [])
+      .map((item, index) => [
+        `Treffer ${index + 1}: ${item.title || 'Ohne Titel'}`,
+        item.product ? `Produkt: ${item.product}` : '',
+        item.type ? `Typ: ${item.type}` : '',
+        item.source ? `Quelle: ${item.source}` : '',
+        String(item.content || '').trim()
+      ].filter(Boolean).join('\n'))
       .join('\n\n---\n\n')
-      .slice(0, 60000);
-  } catch {
+      .slice(0, 14000);
+  } catch (error) {
+    console.error('Azure AI Search request failed:', error.message);
     return '';
   }
 }
 
-function getSystemPrompt() {
-  const knowledge = loadKnowledge();
+function getSystemPrompt(searchContext = '') {
   const instructions = [
     'Du bist der Sensise Produkt- und Toolassistent.',
     'Antworte auf Deutsch, klar und hilfreich.',
     'Du darfst allgemein zu Sensise-Produkten, Projektaufnahme, Projektkalkulator und Terminbuchung helfen.',
     'Erfinde keine Preise, Lieferzeiten oder verbindlichen technischen Zusagen.',
     'Wenn eine Frage intern, rechtlich, kommerziell oder sicherheitskritisch ist, weise auf Abstimmung mit dem Sensise-Team hin.',
-    'Nutze die folgende Wissensbasis als bevorzugte Grundlage. Wenn dort keine passende Information steht, sage das transparent und frage nach oder verweise auf das Sensise-Team.'
+    'Nutze den folgenden Kontext aus Azure AI Search als bevorzugte Grundlage.',
+    'Wenn im Kontext keine passende Information steht, sage das transparent und frage nach oder verweise auf das Sensise-Team.'
   ].join(' ');
 
-  if (!knowledge) return instructions;
-  return `${instructions}\n\nWissensbasis:\n${knowledge}`;
+  if (!searchContext) return `${instructions}\n\nAzure-AI-Search-Kontext: Keine passenden Treffer gefunden oder Suche nicht konfiguriert.`;
+  return `${instructions}\n\nAzure-AI-Search-Kontext:\n${searchContext}`;
 }
 
 function normalizeMessages(messages) {
@@ -377,8 +412,8 @@ function normalizeMessages(messages) {
   }));
 }
 
-async function callOpenAI(messages) {
-  const system = getSystemPrompt();
+async function callOpenAI(messages, searchContext) {
+  const system = getSystemPrompt(searchContext);
 
   const payload = JSON.stringify({
     model: process.env.OPENAI_MODEL || 'gpt-4.1-mini',
@@ -406,7 +441,7 @@ async function callOpenAI(messages) {
   return data.output_text || extractOutputText(data) || 'Ich habe keine Antwort erhalten.';
 }
 
-async function callOpenRouter(messages) {
+async function callOpenRouter(messages, searchContext) {
   const apiKey = String(process.env.OPENROUTER_API_KEY || '').trim();
   if (!apiKey.startsWith('sk-or-')) {
     throw new Error('OPENROUTER_API_KEY ist gesetzt, sieht aber nicht wie ein kompletter OpenRouter-Key aus. Der Key muss mit sk-or- beginnen.');
@@ -415,7 +450,7 @@ async function callOpenRouter(messages) {
   const payload = JSON.stringify({
     model: process.env.OPENROUTER_MODEL || 'openai/gpt-4o-mini',
     messages: [
-      { role: 'system', content: getSystemPrompt() },
+      { role: 'system', content: getSystemPrompt(searchContext) },
       ...normalizeMessages(messages)
     ],
     max_tokens: 700,
