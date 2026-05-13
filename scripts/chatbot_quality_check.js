@@ -154,6 +154,21 @@ const tests = [
     mustInclude: ['89']
   },
   {
+    name: 'General discount groups',
+    messages: [{ role: 'user', content: 'Was sind die Rabattgruppen bei Sensise?' }],
+    mustInclude: ['W1', 'W2', 'Software', 'SIM Karte', 'Batterien'],
+    mustNotInclude: ['Sensise Plattform']
+  },
+  {
+    name: 'SAB07 W2 discount follow-up',
+    messages: [
+      { role: 'user', content: 'Und bei dem SAB07' },
+      { role: 'assistant', content: 'dummy' },
+      { role: 'user', content: 'Was wäre das dann mit W2?' }
+    ],
+    mustInclude: ['SAB07 LRW', 'W2', '55 Prozent', '40,05 EUR']
+  },
+  {
     name: 'Unclear faster',
     messages: [{ role: 'user', content: 'Kann ich das Ding schneller machen?' }],
     mustInclude: ['welches Gerät']

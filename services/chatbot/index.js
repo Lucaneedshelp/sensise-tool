@@ -45,6 +45,16 @@ function answerKnownTechnicalQuestion(query) {
     return 'Verbindliche Preise, Angebote oder Rabattfreigaben kann ich nicht zusagen. Bitte stimme das mit dem Sensise-Team bzw. Vertrieb ab.';
   }
 
+  const discountGroupReply = answerDiscountGroupQuestion(normalized);
+  if (discountGroupReply) {
+    return discountGroupReply;
+  }
+
+  const discountCalculationReply = answerDiscountCalculation(text, normalized);
+  if (discountCalculationReply) {
+    return discountCalculationReply;
+  }
+
   const uplinkDirectionReply = answerUplinkDirection(normalized);
   if (uplinkDirectionReply) {
     return uplinkDirectionReply;
@@ -103,6 +113,81 @@ function answerKnownTechnicalQuestion(query) {
     '',
     'Wichtig: Einen Uplink sendet man fachlich nicht an das Gerät. Uplink kommt vom Gerät zum Server. Wenn du dem Gerät etwas senden willst, ist das ein Downlink. Wenn du nur einen Uplink mit 45 Grad Celsius simulieren willst, ist `1001C2` der passende Temperaturwert.'
   ].join('\n');
+}
+
+function answerDiscountGroupQuestion(normalized) {
+  const asksGeneralDiscountGroups = /(rabattgruppe|rabattgruppen)/.test(normalized)
+    && !/(w1|w2|software|sim|schulung|batterie|sab|novos|mcs|gateway|sensor|produkt|artikel)/.test(normalized);
+
+  if (!asksGeneralDiscountGroups) return '';
+
+  return [
+    'Im Sensise Projektkalkulator gibt es diese Rabattgruppen:',
+    '',
+    '- `W1`: maximal 35 Prozent für Endgeräte, Gateways und Zubehör',
+    '- `W2`: maximal 55 Prozent für Endgeräte, Gateways und Zubehör',
+    '- `Software`: maximal 5 Prozent',
+    '- `SIM Karte`: maximal 5 Prozent',
+    '- `Schulung`: maximal 5 Prozent',
+    '- `Batterien`: maximal 5 Prozent',
+    '',
+    'Das sind Kalkulatorgruppen, keine automatische Rabattfreigabe oder ein verbindliches Angebot.'
+  ].join('\n');
+}
+
+function answerDiscountCalculation(text, normalized) {
+  const groupMatch = normalized.match(/\b(w1|w2)\b|software|sim(?:\s*karte)?|schulung|batterie(?:n)?/);
+  if (!groupMatch || !/(rabatt|gruppe|wäre|waere|mit|nachlass|preis|kostet)/.test(normalized)) return '';
+
+  const product = findCatalogProduct(text);
+  if (!product || product.price <= 0) return '';
+
+  const group = getDiscountGroup(groupMatch[0], product);
+  if (!group) return '';
+
+  const discountAmount = product.price * group.rate;
+  const discountedPrice = product.price - discountAmount;
+
+  return [
+    `Für ${product.sku} mit Rabattgruppe ${group.label}:`,
+    '',
+    `Listenpreis netto: ${formatEuro(product.price)}`,
+    `Rabatt ${group.percent} Prozent: -${formatEuro(discountAmount)}`,
+    `Preis nach Rabatt netto: ${formatEuro(discountedPrice)}`,
+    '',
+    'Das ist eine Kalkulation, keine verbindliche Rabattfreigabe.'
+  ].join('\n');
+}
+
+function getDiscountGroup(rawGroup, product) {
+  const group = String(rawGroup || '').toLowerCase().replace(/\s+/g, '');
+  const productText = `${product.category} ${product.sku} ${product.name}`.toLowerCase();
+
+  if (group === 'w1' && ['Endgerät', 'Gateway', 'Zubehör'].includes(product.category)) {
+    return { label: 'W1', percent: 35, rate: 0.35 };
+  }
+
+  if (group === 'w2' && ['Endgerät', 'Gateway', 'Zubehör'].includes(product.category)) {
+    return { label: 'W2', percent: 55, rate: 0.55 };
+  }
+
+  if (group === 'software' && product.category === 'Software') {
+    return { label: 'Software', percent: 5, rate: 0.05 };
+  }
+
+  if (group.startsWith('sim') && productText.includes('sim')) {
+    return { label: 'SIM Karte', percent: 5, rate: 0.05 };
+  }
+
+  if (group === 'schulung' && productText.includes('schulung')) {
+    return { label: 'Schulung', percent: 5, rate: 0.05 };
+  }
+
+  if (group.startsWith('batterie') && productText.includes('batterie')) {
+    return { label: 'Batterien', percent: 5, rate: 0.05 };
+  }
+
+  return null;
 }
 
 function answerUplinkDirection(normalized) {
@@ -270,6 +355,10 @@ function normalizeForMatch(value) {
     .replace(/[^a-z0-9]+/g, ' ')
     .replace(/\s+/g, ' ')
     .trim();
+}
+
+function formatEuro(value) {
+  return `${Number(value || 0).toFixed(2).replace('.', ',')} EUR`;
 }
 
 function answerThermokonConfigPayload(text, normalized) {
