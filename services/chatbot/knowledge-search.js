@@ -67,6 +67,10 @@ function expandSearchQuery(query) {
     additions.push('Thermokon Uplink-Messwerte LoRaWAN Payload Decoder Identifier 0x10 INT16 Temperatur Grad Celsius Teiler 10 TEMP_0 TEMP');
   }
 
+  if (/(sendeintervall|sendeinterval|messintervall|intervall|c108|heartbeat|mcs\s*state)/i.test(normalized)) {
+    additions.push('Thermokon Downlink Messintervall Sendeintervall Uplink-Intervall MCS State Identifier 0xC108 UINT16 Sekunden Minuten C108');
+  }
+
   return [query, ...additions].filter(Boolean).join(' ');
 }
 
