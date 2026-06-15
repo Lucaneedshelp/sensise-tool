@@ -18,6 +18,15 @@
     url: 'apps/payload-decoder-builder/'
   },
   {
+    id: 'sensor-module-builder',
+    title: 'Sensor Module Builder',
+    description: 'Messgrößen auswählen und sensorModule JSON kopieren.',
+    category: 'Daten & Import',
+    badge: 'New',
+    icon: 'table',
+    url: 'apps/sensor-module-builder/'
+  },
+  {
     id: 'project-calculator',
     title: 'Projektkalkulator',
     description: 'Produkte auswählen und Projektkosten kalkulieren.',
