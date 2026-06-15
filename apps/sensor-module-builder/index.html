@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sensor Module Builder</title>
+  <link rel="stylesheet" href="../../assets/css/theme.css">
+  <link rel="stylesheet" href="app.css">
+</head>
+<body>
+  <div class="container app-shell">
+    <div class="app-topbar">
+      <a class="btn btn-secondary" href="../../index.html">Zurück zur Startseite</a>
+      <div class="brand-lockup">
+        <img class="brand-logo" src="../../assets/img/sensise-logo-neg.png" alt="Sensise Logo">
+      </div>
+    </div>
+
+    <header class="hero panel">
+      <div class="eyebrow">Sensor Module Builder</div>
+      <h1>Messgrößen auswählen</h1>
+    </header>
+
+    <section class="builder-grid">
+      <article class="panel panel-strong">
+        <div class="section-head">
+          <h2>Auswahl</h2>
+          <p>Wähle die gewünschten Messgrößen aus.</p>
+        </div>
+
+        <div class="toolbar">
+          <label class="field-group search-field" for="search-input">
+            <span>Suche</span>
+            <input id="search-input" class="field-input" type="search" placeholder="z. B. TEMPERATURE">
+          </label>
+          <label class="field-group filter-field" for="unit-filter">
+            <span>Einheit</span>
+            <select id="unit-filter" class="field-input">
+              <option value="">Alle Einheiten</option>
+            </select>
+          </label>
+        </div>
+
+        <div class="quick-actions">
+          <button class="btn btn-secondary" id="select-common-btn" type="button">Raumklima auswählen</button>
+          <button class="btn btn-secondary" id="clear-btn" type="button">Auswahl leeren</button>
+        </div>
+
+        <div id="sensor-list" class="sensor-list"></div>
+      </article>
+
+      <aside class="panel control-panel">
+        <div class="section-head">
+          <h2>Ausgabe</h2>
+          <p id="selection-summary">Noch keine Messgröße ausgewählt</p>
+        </div>
+
+        <div class="summary-grid">
+          <div class="summary-card">
+            <span>Ausgewählt</span>
+            <strong id="selected-count">0</strong>
+          </div>
+          <div class="summary-card">
+            <span>Katalog</span>
+            <strong id="catalog-count">0</strong>
+          </div>
+        </div>
+
+        <div class="section-actions">
+          <button class="btn btn-secondary" id="download-btn" type="button">Download</button>
+        </div>
+
+        <div id="copy-status" class="inline-status">Bereit</div>
+      </aside>
+    </section>
+
+    <section class="panel export-panel">
+      <div class="preview-head">
+        <div class="section-head section-head--compact">
+          <h2>JSON-Code</h2>
+          <p>Die Reihenfolge entspricht deiner Auswahl.</p>
+        </div>
+        <div class="preview-actions">
+          <button class="btn btn-primary" id="copy-btn" type="button">Code kopieren</button>
+          <button class="btn btn-secondary" id="format-btn" type="button">Neu formatieren</button>
+        </div>
+      </div>
+      <pre id="json-preview" class="code-preview"></pre>
+    </section>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
